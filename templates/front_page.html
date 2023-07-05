@@ -1,0 +1,26 @@
+{% extends 'base.html' %}
+
+{% block head %} 
+<title>Spotify Game</title>
+{% endblock %}
+
+{% block body %} 
+
+<h1 style = "text-align: center">🎵Spotify Game🎵</h1>
+
+
+<body style = "text-align: center">How well do you know the songs in your playlist?</body>
+<br>
+<br>
+<body style = "text-align: center">Log into your spotify accounts below to find out!</body>
+
+<div style="display: flex; justify-content: center; align-items: center; height: 50vh;">
+    <h4>Log in port will go here</h4>
+</div>
+
+<div style="display: flex; justify-content: center; align-items: center; height: 0vh;">
+    <a href="{{ url_for('playlist_select') }}" class="btn btn-primary">Login</a>
+</div>
+
+
+{% endblock %}

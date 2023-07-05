@@ -1,0 +1,20 @@
+{% extends 'base.html' %}
+
+{% block head %} 
+
+{% endblock %}
+
+{% block body %} 
+
+<form action="/guesses" method="post">
+    <label for="title_guess">Title Guess:</label><br>
+    <input type="text" id="title_guess" name="title_guess"><br>
+    <label for="artist_guess">Artist Guess:</label><br>
+    <input type="text" id="artist_guess" name="artist_guess"><br>
+    <input type="submit" value="Submit">
+</form> 
+
+
+
+
+{% endblock %}
