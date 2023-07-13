@@ -1,20 +1,143 @@
+<!--main_page.html-->
+
 {% extends 'base.html' %}
 
 {% block head %} 
 
+<style>
+    .logout {
+        text-align: right;
+    }
+</style>
+
 {% endblock %}
 
 {% block body %} 
+<div class = "logout">
+    <a href="{{ url_for('logout') }}">Logout</a>
+</div>
 
-<form action="/guesses" method="post">
+<h1 style="text-align: center; font-size: 2.5em; margin-bottom: 0;">🎵Quizify🎵</h1>
+<br>
+<br>
+<br>
+<br>
+
+<div id="player">
+    <div>
+        <h2 id="currently-playing">Currently Playing:</h2>
+    </div>
+    <div>
+        <button id="play-button" onclick="playPause()">Play</button>
+        <button id="next-button" onclick="nextTrack()">Next</button>
+    </div>
+    <div>
+        <progress id="progress-bar" value="0" max="100"></progress>
+    </div>
+</div>
+
+
+
+<script src="https://sdk.scdn.co/spotify-player.js"></script>
+<script>
+    // Declare functions in the global scope
+    let playPause, nextTrack;
+    let currentTrack = 0;
+    var tracks = {{ tracks|tojson|safe }};
+
+    window.onSpotifyWebPlaybackSDKReady = () => {
+        const token = '{{ access_token }}';
+        const player = new Spotify.Player({
+            name: 'Web Playback SDK Quick Start Player',
+            getOAuthToken: cb => { cb(token); }
+        });
+
+        // Error handling
+        player.addListener('initialization_error', ({ message }) => { console.error(message); });
+        player.addListener('authentication_error', ({ message }) => { console.error(message); });
+        player.addListener('account_error', ({ message }) => { console.error(message); });
+        player.addListener('playback_error', ({ message }) => { console.error(message); });
+
+        // Playback status updates
+        player.addListener('player_state_changed', state => { console.log(state); });
+
+        // Ready
+        player.addListener('ready', ({ device_id }) => {
+            console.log('Ready with Device ID', device_id);
+            player.device_id = device_id;
+
+            // Load the first track
+            fetch('https://api.spotify.com/v1/me/player/play?device_id=' + device_id, {
+                method: 'PUT',
+                body: JSON.stringify({ uris: [tracks[currentTrack].uri] }),
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                },
+            })
+            .then(() => console.log('Track loaded'))
+            .catch(console.error);
+
+            // Pause or Play current song
+            document.getElementById('play-button').addEventListener('click', playPause);
+
+            // Play next track
+            document.getElementById('next-button').addEventListener('click', nextTrack);
+        });
+
+        // Pause or Play current song
+        playPause = function() {
+            player.togglePlay();
+        }
+
+        // Connect to the player!
+        player.connect().then(success => {
+            if (success) {
+                console.log('Successfully connected to the player.');
+            }
+        }).catch(error => {
+            console.error('Error connecting to the player:', error);
+        });
+
+        // Play next track
+        nextTrack = function() {
+            currentTrack = (currentTrack + 1) % tracks.length;
+            fetch('https://api.spotify.com/v1/me/player/play?device_id=' + player.device_id, {
+                method: 'PUT',
+                body: JSON.stringify({ uris: [tracks[currentTrack].uri] }),
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                },
+            })
+            .then(() => console.log('Next track loaded'))
+            .catch(console.error);
+            }
+    };
+</script>
+
+
+
+
+<br>
+<br>
+<br>
+
+<form action="/guesses" method="post" style ="text-align: center;">
     <label for="title_guess">Title Guess:</label><br>
     <input type="text" id="title_guess" name="title_guess"><br>
     <label for="artist_guess">Artist Guess:</label><br>
-    <input type="text" id="artist_guess" name="artist_guess"><br>
+    <input type="text" id="artist_guess" name="artist_guess"><br><br>
     <input type="submit" value="Submit">
-</form> 
+</form>
 
+{% if tracks %}
+<ul>
+    {% for track in tracks %}
+    <li>{{ track['name'] }} by {{ track['artist'] }}</li>
+{% endfor %}
 
-
+</ul>
+{% endif %}
 
 {% endblock %}

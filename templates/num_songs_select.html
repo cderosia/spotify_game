@@ -1,0 +1,54 @@
+<!--num_songs_select.html-->
+
+{% extends 'base.html' %}
+
+{% block head %} 
+<style>
+    .container {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 60vh;
+    }
+
+    .form {
+        text-align: center;
+        font-size: 2em;
+    }
+
+    .form label {
+        font-size: inherit;
+    }
+
+    .form input[type="number"],
+    .form input[type="submit"] {
+        font-size: inherit;
+    }
+
+    .logout {
+        text-align: right;
+    }
+</style>
+{% endblock %}
+
+{% block body %} 
+<div class = "logout">
+    <a href="{{ url_for('logout') }}">Logout</a>
+</div>
+<h1 style="text-align: center; font-size: 2.5em; margin-bottom: 0;">🎵Quizify🎵</h1>
+<div class="container">
+    <div class="form">
+        <h3 style="font-size: inherit;">Selected Playlist: {{ playlist_name }} ({{total_songs_in_playlist}} songs)</h3>
+        <br>
+        <form method="POST">
+            <label for="num_songs" style="font-size: inherit;">How many songs do you want to play with?</label>
+            <input type="number" id="num_songs" name="num_songs" min="1" required>
+            <input type="submit" value="Start Game">
+        </form>
+        
+        <p style="font-size: 0.75em;">*May take a while for liked songs playlist</p>
+
+    </div>
+</div>
+
+{% endblock %}

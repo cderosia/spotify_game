@@ -1,15 +1,56 @@
+<!--playlist_select.html-->
 {% extends 'base.html' %}
 
 {% block head %} 
+<style>
+    .grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+        gap: 1rem;
+    }
 
+    .grid-item {
+        padding: 1rem;
+        text-align: center;
+    }
+    .logout {
+        text-align: right;
+    }
+</style>
 {% endblock %}
 
 {% block body %} 
-
-<h2 style = "text-align: center">Select a playlist</h2>
-
-<div style="display: flex; justify-content: center; align-items: center; height: 0vh;">
-    <a href="{{ url_for('main_page') }}" class="btn btn-primary">Start Game</a>
+<div class = "logout">
+    <a href="{{ url_for('logout') }}">Logout</a>
 </div>
+
+<h1 style="text-align: center; font-size: 2.5em; margin-bottom: 0; margin-top: 0;">🎵Quizify🎵</h1>
+
+
+<br>
+<h3 style="text-align: center; margin-top: 0; margin-bottom: 5;">Select a playlist</h3>
+
+
+<div class="grid">
+    {% for playlist in playlists %}
+        <div class="grid-item">
+            <h3 style ="margin-top: 0;">{{ playlist['name'] }}</h3>
+            {% if playlist['images'] %}
+            <img src="{{ playlist['images'][0]['url'] }}" alt="{{ playlist['name'] }}" style="width: 100%;">
+            {% endif %}
+            <a href="{{ playlist['external_urls']['spotify'] }}">Open in Spotify</a>
+            
+            <form method="POST" action="{{ url_for('playlist_select') }}">
+                <input type="hidden" name="playlist_id" value="{{ playlist['id'] }}">
+                <br>
+                <button type="submit" class="btn btn-primary">Select Playlist</button>
+            </form>
+            <br>
+            <body>Accuracy: --%</body>
+        </div>
+    {% endfor %}
+</div>
+<br>
+<br>
 
 {% endblock %}

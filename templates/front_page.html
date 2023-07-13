@@ -1,26 +1,23 @@
 {% extends 'base.html' %}
 
 {% block head %} 
-<title>Spotify Game</title>
+<title>Quizify</title>
 {% endblock %}
 
 {% block body %} 
 
-<h1 style = "text-align: center">🎵Spotify Game🎵</h1>
+<h1 style="text-align: center; font-size: 3em;">🎵Quizify🎵</h1>
 
-
-<body style = "text-align: center">How well do you know the songs in your playlist?</body>
+<body style="text-align: center; font-size: 2em;">How well do you know the songs in your playlists?</body>
 <br>
 <br>
-<body style = "text-align: center">Log into your spotify accounts below to find out!</body>
+<body style="text-align: center; font-size: 2em;">Log into your Spotify account below to find out!</body>
 
-<div style="display: flex; justify-content: center; align-items: center; height: 50vh;">
-    <h4>Log in port will go here</h4>
+<div style="display: flex; justify-content: center; align-items: center; height: 50vh; font-size: 1em;">
+    <img src="{{ url_for('static', filename='icon3@2x.png') }}" alt="Image description" style="width: 50px; height: 50px; margin-right: 10px;">
+    <a href="{{ url_for('login') }}" class="btn btn-primary">LOGIN</a>
+
+    
 </div>
-
-<div style="display: flex; justify-content: center; align-items: center; height: 0vh;">
-    <a href="{{ url_for('playlist_select') }}" class="btn btn-primary">Login</a>
-</div>
-
 
 {% endblock %}
