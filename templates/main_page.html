@@ -7,6 +7,15 @@
 <style>
     .logout {
         text-align: right;
+     
+    }
+    /* Center button styling */
+    .center-button {
+        position: absolute;
+        top: 38%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        font-size: 1.5em;
     }
 </style>
 
@@ -24,26 +33,25 @@
 <br>
 
 <div id="player">
+    
+    
     <div>
-        <h2 id="currently-playing">Currently Playing:</h2>
-    </div>
-    <div>
-        <button id="play-button" onclick="playPause()">Play</button>
-        <button id="next-button" onclick="nextTrack()">Next</button>
-    </div>
-    <div>
-        <progress id="progress-bar" value="0" max="100"></progress>
+        <h2 style = "text-align: center" id = "elapsed-time">Elapsed Time: 0 seconds</h2>
     </div>
 </div>
 
+<button id="center-play-button" class="center-button" onclick="playPause()">Pause</button>
 
 
 <script src="https://sdk.scdn.co/spotify-player.js"></script>
 <script>
+
+
     // Declare functions in the global scope
     let playPause, nextTrack;
     let currentTrack = 0;
     var tracks = {{ tracks|tojson|safe }};
+
 
     window.onSpotifyWebPlaybackSDKReady = () => {
         const token = '{{ access_token }}';
@@ -59,7 +67,22 @@
         player.addListener('playback_error', ({ message }) => { console.error(message); });
 
         // Playback status updates
-        player.addListener('player_state_changed', state => { console.log(state); });
+        player.addListener('player_state_changed', state => { 
+            console.log(state); 
+
+            // Start the timer if the song has started playing and the timer hasn't been started yet
+            if (!state.paused && !isPlaying) {
+                start = Date.now();
+                timer = setInterval(updateElapsedTime, 1000);  // Update the elapsed time every second
+                isPlaying = true;  // Set the play state to true
+            }
+
+            if(state.paused && state.position === 0 && state.restrictions.disallow_resuming_reasons) {
+                setTimeout(nextTrack, 1000);  // delay the nextTrack function by 1 second
+            }
+        });
+
+
 
         // Ready
         player.addListener('ready', ({ device_id }) => {
@@ -78,19 +101,19 @@
             .then(() => console.log('Track loaded'))
             .catch(console.error);
 
-            // Pause or Play current song
-            document.getElementById('play-button').addEventListener('click', playPause);
+            
 
             // Play next track
             document.getElementById('next-button').addEventListener('click', nextTrack);
         });
 
-        // Pause or Play current song
-        playPause = function() {
-            player.togglePlay();
-        }
+   
+     
+      
 
-        // Connect to the player!
+
+
+        // Connect to the player
         player.connect().then(success => {
             if (success) {
                 console.log('Successfully connected to the player.');
@@ -99,9 +122,23 @@
             console.error('Error connecting to the player:', error);
         });
 
-        // Play next track
+
+        // Variables to track state
+        let start, pauseStart, playTime = 0, pauseCount = 0, totalScore = 0;
+        let isPlaying = false;
+        let timer;
+
+       // Play next track
+       
         nextTrack = function() {
-            currentTrack = (currentTrack + 1) % tracks.length;
+            if (currentTrack >= tracks.length - 1) {
+                console.log('End of playlist');
+                return;
+            }
+            currentTrack = currentTrack + 1;
+
+            console.log('Loading track', tracks[currentTrack].uri);
+
             fetch('https://api.spotify.com/v1/me/player/play?device_id=' + player.device_id, {
                 method: 'PUT',
                 body: JSON.stringify({ uris: [tracks[currentTrack].uri] }),
@@ -110,20 +147,168 @@
                     'Authorization': `Bearer ${token}`
                 },
             })
-            .then(() => console.log('Next track loaded'))
+            .then((response) => {
+                if (!response.ok) {
+                    return response.json().then(err => {throw err});
+                }
+                console.log('Next track loaded')
+                // Track start time
+                start = Date.now();
+                // Reset pause count and play time
+                pauseCount = 0;
+                playTime = 0;
+                // Enable pause button
+                document.getElementById('play-button').disabled = false;
+            })
             .catch(console.error);
+        }
+
+        playPause = function() {
+            if (isPlaying) {
+                pauseCount++;
+                // If limit reached, disable pause button
+                if (pauseCount >= 3) {
+                    document.getElementById('center-play-button').disabled = true;
+                    
+                }
+                player.pause();
+                playTime += Date.now() - start;
+                clearInterval(timer);  // Stop updating the elapsed time every second
+                document.getElementById('center-play-button').textContent = 'Play';
+                isPlaying = false;  // Set the play state to false
+            } else {
+                player.resume();
+                start = Date.now();
+                timer = setInterval(updateElapsedTime, 1000);  // Update the elapsed time every second
+                document.getElementById('center-play-button').textContent = 'Pause';
+                isPlaying = true;  // Set the play state to true
             }
+        }
+
+
+        function updateElapsedTime() {
+            let elapsed = Math.floor((Date.now() - start + playTime) / 1000);
+            document.getElementById('elapsed-time').textContent = 'Elapsed Time: ' + elapsed + ' seconds';
+        }
+        
+        // Function to evaluate guesses and assign points
+        function evaluateGuess(titleGuess, artistGuess, correctTitle, correctArtist) {
+            // Calculate elapsed time in seconds
+            let elapsed = playTime / 1000;
+            // Check guesses
+            let titleCorrect = titleGuess === correctTitle;
+            let artistCorrect = artistGuess === correctArtist;
+            // Calculate score
+            // score can be max 100
+            let score;
+            
+            // guess before 2 seconds of playtime
+            if (elapsed <= 2) {
+                if (titleCorrect && artistCorrect) {
+                    score = 100;
+                }
+                else if (titleCorrect && !artistCorrect) {
+                    score = 50;
+                }
+                else if (!titleCorrect && artistCorrect) {
+                    score = 50;
+                }
+                else {
+                    score = 0;
+                }
+            } 
+            // guess before 4 seconds of playtime
+            else if (elapsed <= 4) {
+                if (titleCorrect && artistCorrect) {
+                    score = 90;
+                }
+                else if (titleCorrect && !artistCorrect) {
+                    score = 45;
+                }
+                else if (!titleCorrect && artistCorrect) {
+                    score = 45;
+                }
+                else {
+                    score = 0;
+                }
+            } 
+            // guess before 6 seconds of playtime
+            else if (elapsed <= 6) {
+                if (titleCorrect && artistCorrect) {
+                    score = 70;
+                }
+                else if (titleCorrect && !artistCorrect) {
+                    score = 35;
+                }
+                else if (!titleCorrect && artistCorrect) {
+                    score = 35;
+                }
+                else {
+                    score = 0;
+                }
+            } 
+            // guess before 10 seconds of playtime
+            else if (elapsed <= 10) {
+                if (titleCorrect && artistCorrect) {
+                    score = 40;
+                }
+                else if (titleCorrect && !artistCorrect) {
+                    score = 20;
+                }
+                else if (!titleCorrect && artistCorrect) {
+                    score = 20;
+                }
+                else {
+                    score = 0;
+                }
+            } 
+            // guess before 20 seconds of playtime
+            else if (elapsed <= 20) {
+                if (titleCorrect && artistCorrect) {
+                    score = 20;
+                }
+                else if (titleCorrect && !artistCorrect) {
+                    score = 10;
+                }
+                else if (!titleCorrect && artistCorrect) {
+                    score = 10;
+                }
+                else {
+                    score = 0;
+                }
+            } 
+            // guess before 30 seconds of playtime
+            else if (elapsed <= 30) {
+                if (titleCorrect && artistCorrect) {
+                    score = 10;
+                }
+                else if (titleCorrect && !artistCorrect) {
+                    score = 5;
+                }
+                else if (!titleCorrect && artistCorrect) {
+                    score = 5;
+                }
+                else {
+                    score = 0;
+                }
+            } 
+            
+            // Update total score
+            totalScore += score;
+        }
+
+
     };
 </script>
 
-
-
-
+<br>
+<br>
+<br>
 <br>
 <br>
 <br>
 
-<form action="/guesses" method="post" style ="text-align: center;">
+<form action="/guesses" method="post" style ="text-align: center">
     <label for="title_guess">Title Guess:</label><br>
     <input type="text" id="title_guess" name="title_guess"><br>
     <label for="artist_guess">Artist Guess:</label><br>
