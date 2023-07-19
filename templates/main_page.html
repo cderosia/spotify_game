@@ -12,11 +12,32 @@
     /* Center button styling */
     .center-button {
         position: absolute;
-        top: 38%;
+        top: 36%;
         left: 50%;
         transform: translate(-50%, -50%);
         font-size: 1.5em;
     }
+    #pausetimer {
+        
+        text-align: center;
+        top: 38%;
+        font-size: 1.5em;
+    }
+    .pausecount {
+        text-align: center;
+        font-size: 1.25em;
+    }
+    .button-container {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 100%
+    }
+    .score {
+        text-align: center;
+        font-size: 1.5em;
+    }
+
 </style>
 
 {% endblock %}
@@ -28,12 +49,12 @@
 
 <h1 style="text-align: center; font-size: 2.5em; margin-bottom: 0;">🎵Quizify🎵</h1>
 <br>
-<br>
-<br>
-<br>
+
+
+<div id = "song-count" style = "text-align: center; font-size: 1.5em;"></div>
+<div id = "score" class = "score">Total Score: 0</div>
 
 <div id="player">
-    
     
     <div>
         <h2 style = "text-align: center" id = "elapsed-time">Elapsed Time: 0 seconds</h2>
@@ -41,6 +62,16 @@
 </div>
 
 <button id="center-play-button" class="center-button" onclick="playPause()">Pause</button>
+<br>
+<br>
+
+<br>
+
+
+
+<div id="pausetimer"></div>
+<div class = "pausecount" id = "pausecount"> </div>
+
 
 
 <script src="https://sdk.scdn.co/spotify-player.js"></script>
@@ -51,6 +82,9 @@
     let playPause, nextTrack;
     let currentTrack = 0;
     var tracks = {{ tracks|tojson|safe }};
+    let song_num;
+    let total_songs = tracks.length;
+
 
 
     window.onSpotifyWebPlaybackSDKReady = () => {
@@ -101,10 +135,14 @@
             .then(() => console.log('Track loaded'))
             .catch(console.error);
 
-            
+            song_num = 1;
+            // display song number out of total
+            document.getElementById('song-count').textContent = 'Song: 1/' + total_songs;
+            document.getElementById('pausecount').textContent = 'Pauses left: 3';
 
             // Play next track
             document.getElementById('next-button').addEventListener('click', nextTrack);
+            
         });
 
    
@@ -126,11 +164,86 @@
         // Variables to track state
         let start, pauseStart, playTime = 0, pauseCount = 0, totalScore = 0;
         let isPlaying = false;
+        // elapsed time timer
         let timer;
+        // pause time timer
+        let pauseTimer;
 
-       // Play next track
-       
+        // play/pause function
+        playPause = function() {
+            if (isPlaying) {
+                pauseCount++;
+                document.getElementById('pausecount').textContent = 'Pauses left: ' + (3 - pauseCount);
+                // If limit reached, move to next track
+                if (pauseCount >= 3) {
+                    document.getElementById('pausecount').textContent = 'Pauses left: 0';
+                    player.pause();
+                    isPlaying = false;
+                    clearInterval(timer);  // Stop updating the elapsed time every second
+                    document.getElementById('center-play-button').disabled = true;
+                    let remainingTime = 20;
+                    pauseTimer = setInterval(() => {
+                    remainingTime--;
+                    document.getElementById('pausetimer').textContent = 'Remaining Time: ' + remainingTime + ' seconds';
+                    if (remainingTime <= 0) {
+                        clearInterval(pauseTimer);
+                        document.getElementById('pausetimer').textContent = '';
+                        
+                        nextTrack();  // Assuming this function skips to the next track
+                    }
+                }, 1000);
+                    
+                    return;
+                }
+                player.pause();
+                playTime += Date.now() - start;
+                clearInterval(timer);  // Stop updating the elapsed time every second
+                document.getElementById('center-play-button').textContent = 'Play';
+                isPlaying = false;  // Set the play state to false
+
+                // Clear existing pause timer
+                if (pauseTimer) {
+                    clearTimeout(pauseTimer);
+                    pauseTimer = null;
+                }
+                // Start a new 20 seconds countdown timer
+                let remainingTime = 20;
+                pauseTimer = setInterval(() => {
+                    remainingTime--;
+                    document.getElementById('pausetimer').textContent = 'Remaining Time: ' + remainingTime + ' seconds';
+                    if (remainingTime <= 0) {
+                        clearInterval(pauseTimer);
+                        document.getElementById('pausetimer').textContent = '';
+                        playPause(); // Resume the song after 20 seconds
+                    }
+                }, 1000);
+            } else {
+                player.resume();
+                start = Date.now();
+                timer = setInterval(updateElapsedTime, 1000);  // Update the elapsed time every second
+                document.getElementById('center-play-button').textContent = 'Pause';
+                isPlaying = true;  // Set the play state to true
+
+                // Clear countdown timer on resume
+                if (pauseTimer) {
+                    clearInterval(pauseTimer);
+                    pauseTimer = null;
+                    document.getElementById('pausetimer').textContent = '';
+                   
+                }
+            }
+        }
+
+
+
+        // Play next track
         nextTrack = function() {
+            song_num++;
+            document.getElementById('song-count').textContent = 'Song: '  + song_num + '/' + total_songs;
+            document.getElementById('score').textContent = "Total Score: " + totalScore;
+            document.getElementById('pausecount').textContent = 'Pauses left: 3';
+            document.getElementById('center-play-button').disabled = false;
+            
             if (currentTrack >= tracks.length - 1) {
                 console.log('End of playlist');
                 return;
@@ -163,27 +276,7 @@
             .catch(console.error);
         }
 
-        playPause = function() {
-            if (isPlaying) {
-                pauseCount++;
-                // If limit reached, disable pause button
-                if (pauseCount >= 3) {
-                    document.getElementById('center-play-button').disabled = true;
-                    
-                }
-                player.pause();
-                playTime += Date.now() - start;
-                clearInterval(timer);  // Stop updating the elapsed time every second
-                document.getElementById('center-play-button').textContent = 'Play';
-                isPlaying = false;  // Set the play state to false
-            } else {
-                player.resume();
-                start = Date.now();
-                timer = setInterval(updateElapsedTime, 1000);  // Update the elapsed time every second
-                document.getElementById('center-play-button').textContent = 'Pause';
-                isPlaying = true;  // Set the play state to true
-            }
-        }
+        
 
 
         function updateElapsedTime() {
@@ -292,6 +385,9 @@
                     score = 0;
                 }
             } 
+            else {
+                score = 0;
+            }
             
             // Update total score
             totalScore += score;
@@ -304,9 +400,6 @@
 <br>
 <br>
 <br>
-<br>
-<br>
-<br>
 
 <form action="/guesses" method="post" style ="text-align: center">
     <label for="title_guess">Title Guess:</label><br>
@@ -315,6 +408,10 @@
     <input type="text" id="artist_guess" name="artist_guess"><br><br>
     <input type="submit" value="Submit">
 </form>
+<br>
+<div class="button-container">
+    <button id="skip-button" class="skip-button" onclick="nextTrack()">Skip</button>
+</div>
 
 {% if tracks %}
 <ul>
