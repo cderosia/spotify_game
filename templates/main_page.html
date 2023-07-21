@@ -5,10 +5,7 @@
 {% block head %} 
 
 <style>
-    .logout {
-        text-align: right;
-     
-    }
+   
     /* Center button styling */
     .center-button {
         position: absolute;
@@ -24,6 +21,7 @@
         font-size: 1.5em;
     }
     .pausecount {
+        top: 45%;
         text-align: center;
         font-size: 1.25em;
     }
@@ -37,15 +35,54 @@
         text-align: center;
         font-size: 1.5em;
     }
+    .hamburger {
+        position: absolute;
+        top: 15px;
+        right: 15px;
+        font-size: 30px;
+        cursor: pointer;
+        z-index: 2;
+    }
+
+    .hamburger-menu {
+        position: fixed;
+        top: 0;
+        right: 0;
+        width: 0;
+        height: 100vh;
+        background: #000000;
+        overflow-x: hidden;
+        transition: 0.5s;
+        padding-top: 60px;
+    }
+
+    .hamburger-menu a {
+        padding: 8px 8px 8px 32px;
+        text-decoration: none;
+        font-size: 25px;
+        color: #ffffff;
+        display: block;
+        transition: 0.3s;
+    }
+
+    .hamburger-menu a:hover {
+        color: #1DB954;
+    }
 
 </style>
 
 {% endblock %}
 
 {% block body %} 
-<div class = "logout">
+
+
+<button class="hamburger">&#9776;</button>
+
+<nav class="hamburger-menu">
+    <a href="{{ url_for('rules') }}">Rules</a>
     <a href="{{ url_for('logout') }}">Logout</a>
-</div>
+</nav>
+
 
 <h1 style="text-align: center; font-size: 2.5em; margin-bottom: 0;">🎵Quizify🎵</h1>
 <br>
@@ -66,10 +103,12 @@
 <br>
 
 <br>
-
-
+<br>
+<br>
+<br>
 
 <div id="pausetimer"></div>
+<br>
 <div class = "pausecount" id = "pausecount"> </div>
 
 
@@ -79,7 +118,7 @@
 
 
     // Declare functions in the global scope
-    let playPause, nextTrack;
+    let playPause, nextTrack, processGuess;
     let currentTrack = 0;
     var tracks = {{ tracks|tojson|safe }};
     let song_num;
@@ -168,6 +207,7 @@
         let timer;
         // pause time timer
         let pauseTimer;
+        let elapsedTime = 0; // Initial value
 
         // play/pause function
         playPause = function() {
@@ -238,9 +278,10 @@
 
         // Play next track
         nextTrack = function() {
+            console.log(totalScore);
             song_num++;
+            
             document.getElementById('song-count').textContent = 'Song: '  + song_num + '/' + total_songs;
-            document.getElementById('score').textContent = "Total Score: " + totalScore;
             document.getElementById('pausecount').textContent = 'Pauses left: 3';
             document.getElementById('center-play-button').disabled = false;
             
@@ -250,6 +291,8 @@
             }
             currentTrack = currentTrack + 1;
 
+            console.log(tracks[currentTrack].name)
+            console.log(tracks[currentTrack].artist)
             console.log('Loading track', tracks[currentTrack].uri);
 
             fetch('https://api.spotify.com/v1/me/player/play?device_id=' + player.device_id, {
@@ -280,118 +323,93 @@
 
 
         function updateElapsedTime() {
-            let elapsed = Math.floor((Date.now() - start + playTime) / 1000);
-            document.getElementById('elapsed-time').textContent = 'Elapsed Time: ' + elapsed + ' seconds';
+            elapsedTime = Math.floor((Date.now() - start + playTime) / 1000);
+            document.getElementById('elapsed-time').textContent = 'Elapsed Time: ' + elapsedTime + ' seconds';
         }
+
+        processGuess = function() {
+            console.log("process guess");
+            let titleGuess = document.getElementById('title_guess').value;
+            let artistGuess = document.getElementById('artist_guess').value;
+            
+            let currentSongName = tracks[currentTrack].name;
+            let currentArtists = tracks[currentTrack].artist; // This could be an array if there are multiple artists
+
+            
+            
+            evaluateGuess(titleGuess, artistGuess, currentSongName, currentArtists);
+
+            // Clear the guess inputs
+            document.getElementById('title_guess').value = '';
+            document.getElementById('artist_guess').value = '';
+           
+        }
+
         
         // Function to evaluate guesses and assign points
-        function evaluateGuess(titleGuess, artistGuess, correctTitle, correctArtist) {
-            // Calculate elapsed time in seconds
-            let elapsed = playTime / 1000;
+        function evaluateGuess(titleGuess, artistGuess, correctTitle, correctArtists) {
+            console.log("evaluate guess");
+            
+            let elapsed = elapsedTime;
+
             // Check guesses
-            let titleCorrect = titleGuess === correctTitle;
-            let artistCorrect = artistGuess === correctArtist;
+            // Use toLowerCase to make comparison case insensitive
+            let titleCorrect = titleGuess.toLowerCase() === correctTitle.toLowerCase();
+            let artistCorrect = artistGuess.toLowerCase() === correctArtists.toLowerCase();
+
+
+            console.log(titleCorrect);
             // Calculate score
             // score can be max 100
             let score;
             
             // guess before 2 seconds of playtime
             if (elapsed <= 2) {
-                if (titleCorrect && artistCorrect) {
-                    score = 100;
-                }
-                else if (titleCorrect && !artistCorrect) {
-                    score = 50;
-                }
-                else if (!titleCorrect && artistCorrect) {
-                    score = 50;
-                }
-                else {
-                    score = 0;
-                }
+                score = calculateScore(titleCorrect, artistCorrect, 100, 50);
             } 
             // guess before 4 seconds of playtime
             else if (elapsed <= 4) {
-                if (titleCorrect && artistCorrect) {
-                    score = 90;
-                }
-                else if (titleCorrect && !artistCorrect) {
-                    score = 45;
-                }
-                else if (!titleCorrect && artistCorrect) {
-                    score = 45;
-                }
-                else {
-                    score = 0;
-                }
+                score = calculateScore(titleCorrect, artistCorrect, 90, 45);
             } 
             // guess before 6 seconds of playtime
             else if (elapsed <= 6) {
-                if (titleCorrect && artistCorrect) {
-                    score = 70;
-                }
-                else if (titleCorrect && !artistCorrect) {
-                    score = 35;
-                }
-                else if (!titleCorrect && artistCorrect) {
-                    score = 35;
-                }
-                else {
-                    score = 0;
-                }
+                score = calculateScore(titleCorrect, artistCorrect, 70, 35);
             } 
             // guess before 10 seconds of playtime
             else if (elapsed <= 10) {
-                if (titleCorrect && artistCorrect) {
-                    score = 40;
-                }
-                else if (titleCorrect && !artistCorrect) {
-                    score = 20;
-                }
-                else if (!titleCorrect && artistCorrect) {
-                    score = 20;
-                }
-                else {
-                    score = 0;
-                }
+                score = calculateScore(titleCorrect, artistCorrect, 40, 20);
             } 
             // guess before 20 seconds of playtime
             else if (elapsed <= 20) {
-                if (titleCorrect && artistCorrect) {
-                    score = 20;
-                }
-                else if (titleCorrect && !artistCorrect) {
-                    score = 10;
-                }
-                else if (!titleCorrect && artistCorrect) {
-                    score = 10;
-                }
-                else {
-                    score = 0;
-                }
+                score = calculateScore(titleCorrect, artistCorrect, 20, 10);
             } 
             // guess before 30 seconds of playtime
             else if (elapsed <= 30) {
-                if (titleCorrect && artistCorrect) {
-                    score = 10;
-                }
-                else if (titleCorrect && !artistCorrect) {
-                    score = 5;
-                }
-                else if (!titleCorrect && artistCorrect) {
-                    score = 5;
-                }
-                else {
-                    score = 0;
-                }
+                score = calculateScore(titleCorrect, artistCorrect, 10, 5);
             } 
             else {
+                console.log("no points");
                 score = 0;
             }
             
             // Update total score
             totalScore += score;
+            document.getElementById('score').textContent = "Total Score: " + totalScore;
+            nextTrack();
         }
+
+        function calculateScore(titleCorrect, artistCorrect, bothCorrectScore, oneCorrectScore) {
+            if (titleCorrect && artistCorrect) {
+                return bothCorrectScore;
+            }
+            else if (titleCorrect || artistCorrect) {
+                return oneCorrectScore;
+            }
+            else {
+                return 0;
+            }
+        }
+
 
 
     };
@@ -401,25 +419,31 @@
 <br>
 <br>
 
-<form action="/guesses" method="post" style ="text-align: center">
+<form onsubmit="event.preventDefault(); processGuess();" style ="text-align: center">
     <label for="title_guess">Title Guess:</label><br>
     <input type="text" id="title_guess" name="title_guess"><br>
     <label for="artist_guess">Artist Guess:</label><br>
     <input type="text" id="artist_guess" name="artist_guess"><br><br>
     <input type="submit" value="Submit">
 </form>
+
+
+
 <br>
 <div class="button-container">
     <button id="skip-button" class="skip-button" onclick="nextTrack()">Skip</button>
 </div>
 
-{% if tracks %}
-<ul>
-    {% for track in tracks %}
-    <li>{{ track['name'] }} by {{ track['artist'] }}</li>
-{% endfor %}
 
-</ul>
-{% endif %}
+<script>
+    document.querySelector('.hamburger').addEventListener('click', function() {
+        var menu = document.querySelector('.hamburger-menu');
+        if (menu.style.width === '0px' || menu.style.width === '') {
+            menu.style.width = '250px';
+        } else {
+            menu.style.width = '0px';
+        }
+    });
+</script>
 
 {% endblock %}

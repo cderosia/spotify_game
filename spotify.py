@@ -1,11 +1,9 @@
  #spotify.py
-from flask import Flask, render_template, request, url_for, redirect, session, jsonify 
+from flask import Flask, render_template, request, url_for, redirect, session
 import spotipy
 from spotipy.oauth2 import SpotifyOAuth
 import random
-import json
-import requests
-import base64
+
 
 
 
@@ -48,7 +46,8 @@ def callback():
     token_info = sp_oauth.get_access_token(code)
     session['token_info'] = token_info
     session['refresh_token'] = token_info['refresh_token']  # Save the refresh token
-    return redirect(url_for('playlist_select'))
+    return redirect(url_for('rules'))  # <-- redirect to the rules page
+
 
 
 # logout function
@@ -59,6 +58,9 @@ def logout():
 
 
 
+@app.route('/rules', methods=['GET', 'POST'])
+def rules():
+    return render_template('rules_page.html')
 
 
 

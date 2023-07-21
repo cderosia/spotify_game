@@ -28,13 +28,50 @@
     .logout {
         text-align: right;
     }
+    .hamburger {
+        position: absolute;
+        top: 15px;
+        right: 15px;
+        font-size: 30px;
+        cursor: pointer;
+        z-index: 2;
+    }
+
+    .hamburger-menu {
+        position: fixed;
+        top: 0;
+        right: 0;
+        width: 0;
+        height: 100vh;
+        background: #000000;
+        overflow-x: hidden;
+        transition: 0.5s;
+        padding-top: 60px;
+    }
+
+    .hamburger-menu a {
+        padding: 8px 8px 8px 32px;
+        text-decoration: none;
+        font-size: 25px;
+        color: #ffffff;
+        display: block;
+        transition: 0.3s;
+    }
+
+    .hamburger-menu a:hover {
+        color: #1DB954;
+    }
 </style>
 {% endblock %}
 
 {% block body %} 
-<div class = "logout">
+<button class="hamburger">&#9776;</button>
+
+<nav class="hamburger-menu">
+    <a href="{{ url_for('rules') }}">Rules</a>
     <a href="{{ url_for('logout') }}">Logout</a>
-</div>
+</nav>
+
 <h1 style="text-align: center; font-size: 2.5em; margin-bottom: 0;">🎵Quizify🎵</h1>
 <div class="container">
     <div class="form">
@@ -51,4 +88,15 @@
     </div>
 </div>
 
+
+<script>
+    document.querySelector('.hamburger').addEventListener('click', function() {
+        var menu = document.querySelector('.hamburger-menu');
+        if (menu.style.width === '0px' || menu.style.width === '') {
+            menu.style.width = '250px';
+        } else {
+            menu.style.width = '0px';
+        }
+    });
+</script>
 {% endblock %}
