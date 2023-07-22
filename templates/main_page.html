@@ -68,6 +68,12 @@
     .hamburger-menu a:hover {
         color: #1DB954;
     }
+    .last-song {
+        text-align: center;
+    }
+    .recap {
+        text-align: center;
+    }
 
 </style>
 
@@ -112,6 +118,7 @@
 <div class = "pausecount" id = "pausecount"> </div>
 
 
+<div class = "recap" id = "recap"></div>
 
 <script src="https://sdk.scdn.co/spotify-player.js"></script>
 <script>
@@ -123,6 +130,7 @@
     var tracks = {{ tracks|tojson|safe }};
     let song_num;
     let total_songs = tracks.length;
+    let currentSongName, currentArtists;
 
 
 
@@ -171,7 +179,11 @@
                     'Authorization': `Bearer ${token}`
                 },
             })
-            .then(() => console.log('Track loaded'))
+            .then(() => {
+                console.log('Track loaded');
+                currentSongName = tracks[currentTrack].name;
+                currentArtists = tracks[currentTrack].artist;
+            })
             .catch(console.error);
 
             song_num = 1;
@@ -181,7 +193,9 @@
 
             // Play next track
             document.getElementById('next-button').addEventListener('click', nextTrack);
+
             
+           
         });
 
    
@@ -211,6 +225,7 @@
 
         // play/pause function
         playPause = function() {
+            
             if (isPlaying) {
                 pauseCount++;
                 document.getElementById('pausecount').textContent = 'Pauses left: ' + (3 - pauseCount);
@@ -278,21 +293,33 @@
 
         // Play next track
         nextTrack = function() {
-            console.log(totalScore);
+            //console.log(totalScore);
             song_num++;
+           
+            clearInterval(pauseTimer);
+            pauseTimer = null;
+            document.getElementById('pausetimer').textContent = '';
             
             document.getElementById('song-count').textContent = 'Song: '  + song_num + '/' + total_songs;
             document.getElementById('pausecount').textContent = 'Pauses left: 3';
             document.getElementById('center-play-button').disabled = false;
             
+            document.getElementById('last-song').textContent = "Last song was: " + currentSongName + " by " + currentArtists + ".";
+            
+
             if (currentTrack >= tracks.length - 1) {
                 console.log('End of playlist');
                 return;
             }
             currentTrack = currentTrack + 1;
 
-            console.log(tracks[currentTrack].name)
-            console.log(tracks[currentTrack].artist)
+            if (currentTrack < tracks.length) {
+                currentSongName = tracks[currentTrack].name;
+                currentArtists = tracks[currentTrack].artist;
+            }
+
+            //console.log(tracks[currentTrack].name)
+            //console.log(tracks[currentTrack].artist)
             console.log('Loading track', tracks[currentTrack].uri);
 
             fetch('https://api.spotify.com/v1/me/player/play?device_id=' + player.device_id, {
@@ -328,12 +355,12 @@
         }
 
         processGuess = function() {
-            console.log("process guess");
+            //console.log("process guess");
             let titleGuess = document.getElementById('title_guess').value;
             let artistGuess = document.getElementById('artist_guess').value;
             
-            let currentSongName = tracks[currentTrack].name;
-            let currentArtists = tracks[currentTrack].artist; // This could be an array if there are multiple artists
+            currentSongName = tracks[currentTrack].name;
+            currentArtists = tracks[currentTrack].artist;
 
             
             
@@ -348,17 +375,31 @@
         
         // Function to evaluate guesses and assign points
         function evaluateGuess(titleGuess, artistGuess, correctTitle, correctArtists) {
-            console.log("evaluate guess");
+            //console.log("evaluate guess");
             
             let elapsed = elapsedTime;
 
+            // Prepare for checking guesses
+            // Convert everything to lowercase to make comparison case insensitive
+            // Remove everything inside parentheses or brackets
+            // Remove everything after a hyphen
+            // Remove all punctuation
+            let titleGuessClean = titleGuess.toLowerCase().replace(/[\(\[].*?[\)\]]/g, '').replace(/-.*/g, '').replace(/[.,\/#!$%\^&\*;:{}=\-_`~()]/g, '').trim();
+            let artistGuessClean = artistGuess.toLowerCase().replace(/[\(\[].*?[\)\]]/g, '').replace(/-.*/g, '').replace(/[.,\/#!$%\^&\*;:{}=\-_`~()]/g, '').trim();
+            let correctTitleClean = correctTitle.toLowerCase().replace(/[\(\[].*?[\)\]]/g, '').replace(/-.*/g, '').replace(/[.,\/#!$%\^&\*;:{}=\-_`~()]/g, '').trim();
+            let correctArtistsClean = correctArtists.toLowerCase().replace(/[\(\[].*?[\)\]]/g, '').replace(/-.*/g, '').replace(/[.,\/#!$%\^&\*;:{}=\-_`~()]/g, '').trim();
+
             // Check guesses
-            // Use toLowerCase to make comparison case insensitive
-            let titleCorrect = titleGuess.toLowerCase() === correctTitle.toLowerCase();
-            let artistCorrect = artistGuess.toLowerCase() === correctArtists.toLowerCase();
+            let titleCorrect = titleGuessClean === correctTitleClean;
+            let artistCorrect = artistGuessClean === correctArtistsClean;
 
-
-            console.log(titleCorrect);
+            /*console.log("title guess clean: " + titleGuessClean);
+            console.log("artist guess clean: " + artistGuessClean);
+            console.log("correct title clean: " + correctTitleClean);
+            console.log("correct artist clean: "+ correctArtistsClean);
+            console.log("title correct:" + titleCorrect);
+            console.log("artist correct: " + artistCorrect);
+            */
             // Calculate score
             // score can be max 100
             let score;
@@ -391,7 +432,7 @@
                 console.log("no points");
                 score = 0;
             }
-            
+            //console.log(score);
             // Update total score
             totalScore += score;
             document.getElementById('score').textContent = "Total Score: " + totalScore;
@@ -400,12 +441,19 @@
 
         function calculateScore(titleCorrect, artistCorrect, bothCorrectScore, oneCorrectScore) {
             if (titleCorrect && artistCorrect) {
+                //console.log("both correct");
                 return bothCorrectScore;
             }
-            else if (titleCorrect || artistCorrect) {
+            else if (titleCorrect) {
+                //console.log("just title correct");
+                return oneCorrectScore;
+            }
+            else if (artistCorrect) {
+                //console.log("just arist correct");
                 return oneCorrectScore;
             }
             else {
+                //console.log("neither correct");
                 return 0;
             }
         }
@@ -433,6 +481,10 @@
 <div class="button-container">
     <button id="skip-button" class="skip-button" onclick="nextTrack()">Skip</button>
 </div>
+<br>
+<br>
+<br>
+<div class = "last-song" id = "last-song"></div>
 
 
 <script>
