@@ -68,12 +68,49 @@
     .hamburger-menu a:hover {
         color: #1DB954;
     }
-    .last-song {
-        text-align: center;
+    
+    /* The Modal (background) */
+    .modal {
+        display: none; /* Hidden by default */
+        position: fixed; /* Stay in place */
+        z-index: 1; /* Sit on top */
+        padding-top: 170px; /* Location of the box */
+        left: 0;
+        top: 0;
+        width: 100%; /* Full width */
+        height: 600%; /* Full height */
+        overflow: auto; /* Enable scroll if needed */
+        background-color: rgb(0,0,0); /* Fallback color */
+        background-color: rgba(0,0,0,0.4); /* Black w/ opacity */
     }
-    .recap {
+
+    /* Modal Content */
+    .modal-content {
+        background-color: #1DB954;
+        margin: auto;
+        padding: 20px;
+        border: 1px solid black;
+        width: 80%;
         text-align: center;
+        font-size: 2em;
     }
+
+    /* The Close Button */
+    .close {
+    color: #302f2f;
+    float: right;
+    font-size: 28px;
+    font-weight: bold;
+    }
+
+    .close:hover,
+    .close:focus {
+    color: #000;
+    text-decoration: none;
+    cursor: pointer;
+    }
+
+
 
 </style>
 
@@ -110,8 +147,6 @@
 
 <br>
 <br>
-<br>
-<br>
 
 <div id="pausetimer"></div>
 <br>
@@ -131,6 +166,7 @@
     let song_num;
     let total_songs = tracks.length;
     let currentSongName, currentArtists;
+  
 
 
 
@@ -294,7 +330,14 @@
         // Play next track
         nextTrack = function() {
             //console.log(totalScore);
+
+            modal.style.display = "none";
             song_num++;
+
+
+            if (song_num == total_songs + 1) {
+                window.location.href = 'result_page.html';
+            }
            
             clearInterval(pauseTimer);
             pauseTimer = null;
@@ -304,11 +347,12 @@
             document.getElementById('pausecount').textContent = 'Pauses left: 3';
             document.getElementById('center-play-button').disabled = false;
             
-            document.getElementById('last-song').textContent = "Last song was: " + currentSongName + " by " + currentArtists + ".";
+            
             
 
             if (currentTrack >= tracks.length - 1) {
                 console.log('End of playlist');
+                // open results_page.html
                 return;
             }
             currentTrack = currentTrack + 1;
@@ -354,6 +398,27 @@
             document.getElementById('elapsed-time').textContent = 'Elapsed Time: ' + elapsedTime + ' seconds';
         }
 
+
+        // Get the modal
+        var modal = document.getElementById("myModal");
+
+        // Get the <span> element that closes the modal
+        var span = document.getElementsByClassName("close")[0];
+
+        // When the user clicks on <span> (x), close the modal
+        span.onclick = function() {
+            modal.style.display = "none";
+            nextTrack();
+        }
+
+        // When the user clicks anywhere outside of the modal, close it
+        window.onclick = function(event) {
+            if (event.target == modal) {
+                modal.style.display = "none";
+                nextTrack();
+            }
+            
+        }
         processGuess = function() {
             //console.log("process guess");
             let titleGuess = document.getElementById('title_guess').value;
@@ -366,6 +431,8 @@
             
             evaluateGuess(titleGuess, artistGuess, currentSongName, currentArtists);
 
+           
+            
             // Clear the guess inputs
             document.getElementById('title_guess').value = '';
             document.getElementById('artist_guess').value = '';
@@ -402,59 +469,89 @@
             */
             // Calculate score
             // score can be max 100
-            let score;
             
+            let score;
             // guess before 2 seconds of playtime
             if (elapsed <= 2) {
-                score = calculateScore(titleCorrect, artistCorrect, 100, 50);
+                score = calculateScore(titleCorrect, artistCorrect, 100, 50, elapsedTime);
             } 
             // guess before 4 seconds of playtime
             else if (elapsed <= 4) {
-                score = calculateScore(titleCorrect, artistCorrect, 90, 45);
+                score = calculateScore(titleCorrect, artistCorrect, 90, 45, elapsedTime);
             } 
             // guess before 6 seconds of playtime
             else if (elapsed <= 6) {
-                score = calculateScore(titleCorrect, artistCorrect, 70, 35);
+                score = calculateScore(titleCorrect, artistCorrect, 70, 35, elapsedTime);
             } 
             // guess before 10 seconds of playtime
             else if (elapsed <= 10) {
-                score = calculateScore(titleCorrect, artistCorrect, 40, 20);
+                score = calculateScore(titleCorrect, artistCorrect, 40, 20, elapsedTime);
             } 
             // guess before 20 seconds of playtime
             else if (elapsed <= 20) {
-                score = calculateScore(titleCorrect, artistCorrect, 20, 10);
+                score = calculateScore(titleCorrect, artistCorrect, 20, 10, elapsedTime);
             } 
             // guess before 30 seconds of playtime
             else if (elapsed <= 30) {
-                score = calculateScore(titleCorrect, artistCorrect, 10, 5);
+                score = calculateScore(titleCorrect, artistCorrect, 10, 5, elapsedTime);
             } 
             else {
-                console.log("no points");
-                score = 0;
+                // need to mention you didnt get either correct.
+                score = calculateScore(titleCorrect, artistCorrect, 0, 0, elapsedTime);
             }
             //console.log(score);
             // Update total score
+            
+
             totalScore += score;
             document.getElementById('score').textContent = "Total Score: " + totalScore;
-            nextTrack();
+            player.resume();
         }
 
-        function calculateScore(titleCorrect, artistCorrect, bothCorrectScore, oneCorrectScore) {
-            if (titleCorrect && artistCorrect) {
+        function calculateScore(titleCorrect, artistCorrect, bothCorrectScore, oneCorrectScore, time) {
+            if (titleCorrect && artistCorrect && time <= 30) {
+                // Show the modal with the result
+                document.getElementById('modal-content').innerHTML = "Good Job! You correctly guess both the title and the artist of the song in " + time + " seconds!<br>"
+                                                                     + "The song was " + tracks[currentTrack].name + " by " + tracks[currentTrack].artist + "<br>" 
+                                                                     + "You get " + bothCorrectScore + " points.";
+                modal.style.display = "block";
                 //console.log("both correct");
                 return bothCorrectScore;
             }
-            else if (titleCorrect) {
+            else if (titleCorrect && time <= 30) {
+
+                // Show the modal with the result
+                document.getElementById('modal-content').innerHTML = "Almost! You correctly guessed the title but not the artist of the song in " + time + " seconds.<br>"
+                                                                     + "The song was " + tracks[currentTrack].name + " by " + tracks[currentTrack].artist + "<br>" 
+                                                                     + "You get " + oneCorrectScore + " points.";
+                modal.style.display = "block";
                 //console.log("just title correct");
                 return oneCorrectScore;
             }
-            else if (artistCorrect) {
+            else if (artistCorrect && time <= 30) {
+                // Show the modal with the result
+                document.getElementById('modal-content').innerHTML = "Almost! You correctly guessed the artist but not the title of the song in " + time + " seconds.<br>"
+                                                                     + "The song was " + tracks[currentTrack].name + " by " + tracks[currentTrack].artist + "<br>" 
+                                                                     + "You get " + oneCorrectScore + " points.";
+                modal.style.display = "block";
                 //console.log("just arist correct");
                 return oneCorrectScore;
             }
-            else {
+            else if (time <= 30) {
+                // Show the modal with the result
+                document.getElementById('modal-content').innerHTML = "Sorry! You did not correctly guess either the title or the artist of the song in " + time + " seconds.<br>"
+                                                                     + "The song was " + tracks[currentTrack].name + " by " + tracks[currentTrack].artist + "<br>" 
+                                                                     + "You get " + 0 + " points.";
+                modal.style.display = "block";
                 //console.log("neither correct");
                 return 0;
+            }
+            else {
+                // Show the modal with the result
+                document.getElementById('modal-content').innerHTML = "Sorry! You can only get points if you enter a guess before 30 seconds of the song has played.<br>"
+                                                                     + "The song was " + tracks[currentTrack].name + " by " + tracks[currentTrack].artist + "<br>"  
+                                                                     + "You get " + 0 + " points.";
+                modal.style.display = "block";
             }
         }
 
@@ -485,6 +582,20 @@
 <br>
 <br>
 <div class = "last-song" id = "last-song"></div>
+
+
+  <!-- The Modal -->
+<div id="myModal" class="modal">
+    <!-- Modal content -->
+    <div class="modal-content">
+      <span class="close">&times;</span>
+      <h2>Your Guess Results</h2>
+      <p id="modal-content"></p>
+      <button id="next-song-button" onclick="nextTrack()">Next Song</button>
+    </div>
+  </div>
+  
+
 
 
 <script>

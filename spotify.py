@@ -3,7 +3,7 @@ from flask import Flask, render_template, request, url_for, redirect, session
 import spotipy
 from spotipy.oauth2 import SpotifyOAuth
 import random
-
+import os
 
 
 
@@ -15,47 +15,53 @@ app.config['SESSION_TYPE'] = 'filesystem'
 client_id = '1be96adf59fd4d9982d1b9143ced92d5'
 client_secret = '223b4d56d3f94b92b458b10dd2292532'
 redirect_uri = 'http://127.0.0.1:5001/callback'
+scope = 'streaming user-read-private playlist-read-private user-top-read user-modify-playback-state user-read-email user-library-read'
 
+sp_oauth = SpotifyOAuth(client_id=client_id, client_secret=client_secret, redirect_uri=redirect_uri, 
+                        scope=scope, show_dialog=True, cache_path= 'cache.txt')
 
-
-
-scope = 'streaming user-read-private playlist-read-private user-top-read user-modify-playback-state user-read-email'
-sp_oauth = SpotifyOAuth(client_id=client_id, client_secret=client_secret, redirect_uri=redirect_uri, scope=scope, show_dialog=True, cache_path="token_cache.txt")
-
-
-
-
-# opens front page
 @app.route('/')
 def index():
+
+    # this is the only way i could allow multiuser use
+    # theres got to be a better way to do this
+    file_path = "cache.txt"
+
+    try:
+        if os.path.exists(file_path):
+            os.remove(file_path)
+            print(f"File {file_path} has been successfully removed.")
+        else:
+            print(f"File {file_path} does not exist.")
+    except Exception as e:
+        # Catch and print any exceptions that occur while trying to remove the file
+        print(f"Error occurred while removing file: {file_path}. Error: {str(e)}")
+    
     return render_template('front_page.html')
 
-# logs user into spotify
 @app.route('/login')
 def login():
     auth_url = sp_oauth.get_authorize_url()
-    print(auth_url)  # Add this line
+    print(auth_url) 
+    
     return redirect(auth_url)
 
-
-
-# login helper
 @app.route('/callback')
 def callback():
     code = request.args.get('code')
     token_info = sp_oauth.get_access_token(code)
+
     session['token_info'] = token_info
     session['refresh_token'] = token_info['refresh_token']  # Save the refresh token
-    return redirect(url_for('rules'))  # <-- redirect to the rules page
+    return redirect(url_for('rules'))  
 
-
-
-# logout function
 @app.route('/logout')
 def logout():
     session.pop('token_info', None)  # Clear the token_info from the session
-    return redirect(url_for('index'))  # Redirect to the start page
+   
+    
 
+    return redirect(url_for('index')) 
 
 
 @app.route('/rules', methods=['GET', 'POST'])
@@ -77,11 +83,16 @@ def playlist_select():
         if token_info:
             if sp_oauth.is_token_expired(token_info):
                 token_info = sp_oauth.refresh_access_token(token_info['refresh_token'])
+                session['token_info'] = token_info  # Update the session
             access_token = token_info['access_token']
             sp = spotipy.Spotify(access_token)
 
             if selected_playlist_id == 'liked_songs':
                 playlist_name = 'Liked Songs'
+            
+            #elif selected_playlist_id == 'top_tracks':
+                #playlist_name = 'Your Top 100'
+            
             else:
                 playlist = sp.playlist(selected_playlist_id)
                 playlist_name = playlist.get('name', 'Unnamed Playlist')
@@ -99,6 +110,7 @@ def playlist_select():
         if token_info: 
             if sp_oauth.is_token_expired(token_info):
                 token_info = sp_oauth.refresh_access_token(token_info['refresh_token'])
+                session['token_info'] = token_info  # Update the session
             access_token = token_info['access_token']
         else:
             return redirect('/')
@@ -106,6 +118,7 @@ def playlist_select():
         sp = spotipy.Spotify(access_token)
         playlists = sp.current_user_playlists()
         liked_songs_image_url = url_for('static', filename='icon3@2x.png')
+       # top_songs_image_url = url_for('static', filename = 'top_100.jpeg')
 
         # Add a Liked Songs item to the list
         liked_songs = {
@@ -115,6 +128,18 @@ def playlist_select():
             'images': [{'url': liked_songs_image_url}],
             'id': 'liked_songs'
         }
+        # Fetch the user's top tracks
+       # top_tracks = get_top_tracks(sp)
+        #top_100 = {
+            #'name': 'Your Top 100',
+            #'tracks': top_tracks,
+            #'external_urls': {'spotify': 'https://open.spotify.com/collection/tracks'},
+           # 'images': [{'url': top_songs_image_url}],
+           # 'id': 'top_tracks'
+       #}
+
+        # Add top tracks to the list of playlists
+        #playlists['items'].insert(0, top_100)
         playlists['items'].insert(0, liked_songs)
 
         return render_template('playlist_select.html', playlists=playlists['items'])
@@ -148,6 +173,8 @@ def num_songs_select():
             if playlist_id == 'liked_songs':
                 results = sp.current_user_saved_tracks()
                 total_songs_in_playlist = results['total']
+            #elif playlist_id == 'top_tracks':
+               # total_songs_in_playlist = 100
             else:
                 results = sp.playlist_tracks(playlist_id)
                 total_songs_in_playlist = results['total']
@@ -156,18 +183,25 @@ def num_songs_select():
         else:
             return redirect(url_for('main_page'))
 
-
+#def get_top_tracks(sp, limit=100):
+    #return sp.current_user_top_tracks(limit=limit)['items']
 
 
 
 # This function fetches tracks from a playlist
 def get_tracks_from_playlist(playlist_id, num_tracks, sp):
     if playlist_id == 'liked_songs':
-        results = sp.current_user_saved_tracks()
-        tracks = results['items']
-        while results['next']:
-            results = sp.next(results)
+        offset = 0
+        tracks = []
+        while True:
+            results = sp.current_user_saved_tracks(limit=50, offset=offset)
             tracks.extend(results['items'])
+            if results['next']:
+                offset += 50
+            else:
+                break
+    #elif playlist_id == 'top_tracks':
+        #return get_top_tracks(sp)        
     else:
         results = sp.playlist_tracks(playlist_id)
         tracks = results['items']
@@ -229,7 +263,9 @@ def handle_guesses():
     input_artist_guess = request.form.get('artist_guess')
     return f'Your guess, {input_title_guess} by {input_artist_guess}!'
 
-
+@app.route('/result_page.html')
+def result_page():
+    return render_template('result_page.html')
 
 
 if __name__ == "__main__":
