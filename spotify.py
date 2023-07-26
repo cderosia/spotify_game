@@ -1,9 +1,10 @@
  #spotify.py
-from flask import Flask, render_template, request, url_for, redirect, session
+from flask import Flask, render_template, request, url_for, redirect, session, jsonify
 import spotipy
 from spotipy.oauth2 import SpotifyOAuth
 import random
 import os
+
 
 
 
@@ -214,6 +215,7 @@ def get_tracks_from_playlist(playlist_id, num_tracks, sp):
 
 
 
+
 # Game play page
 @app.route('/main_page', methods=['GET', 'POST'])
 def main_page():
@@ -244,7 +246,7 @@ def main_page():
                    'uri': track['track']['uri']} 
                   for track in tracks]
 
-      
+        # total points is calculated in here
         return render_template('main_page.html', tracks=track_info, access_token=access_token)
 
 
@@ -253,20 +255,40 @@ def main_page():
 
 
 
+@app.route('/store_score', methods=['POST'])
+def store_score():
+    data = request.get_json()
+    total_score = data.get('total_score')
+    both_correct = data.get('both_correct')
+    title_correct = data.get('title_correct')
+    artist_correct = data.get('artist_correct')
+    neither_correct = data.get('neither_correct')
+   
+    session['both_correct'] = both_correct
+    session['title_correct'] = title_correct
+    session['artist_correct'] = artist_correct
+    session['neither_correct'] = neither_correct
+    session['total_score'] = total_score
+    return jsonify({'success': True})
 
 
-
-#temporary gameplay stuff
-@app.route('/guesses', methods=['POST'])
-def handle_guesses():
-    input_title_guess = request.form.get('title_guess')
-    input_artist_guess = request.form.get('artist_guess')
-    return f'Your guess, {input_title_guess} by {input_artist_guess}!'
-
-@app.route('/result_page.html')
+@app.route('/result_page')
 def result_page():
-    return render_template('result_page.html')
+    selected_playlist = session.get('selected_playlist')
+    num_songs = session.get('num_songs')
 
+    max_possible_score = int(num_songs) * 100
+
+    return render_template('result_page.html', 
+        both_correct=session['both_correct'], 
+        title_correct=session['title_correct'],
+        artist_correct=session['artist_correct'],
+        neither_correct=session['neither_correct'],
+        total_score=session['total_score'],
+        playlist_name=selected_playlist['name'],
+        num_songs=num_songs,
+        max_possible_score=max_possible_score
+    )
 
 if __name__ == "__main__":
     app.run(debug = True, port = 5001)

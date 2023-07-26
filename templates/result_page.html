@@ -1,14 +1,76 @@
+<!-- result_page.html-->
 {% extends 'base.html' %}
 
 {% block head %} 
 <title>Quizify</title>
+
+<style>
+    .btn {
+        display: inline-block;
+        background-color: #008CBA; /* blue */
+        color: white;
+        padding: 14px 20px;
+        margin: 8px 0;
+        border: none;
+        cursor: pointer;
+        text-align: center;
+        text-decoration: none;
+    }
+    .btn:hover {
+        background-color: #007B9A;
+    }
+    </style>
+    
 {% endblock %}
 
 {% block body %} 
 
 <h1 style="text-align: center; font-size: 2.5em; margin-bottom: 0;">🎵Quizify🎵</h1>
 <h2 style = "text-align: center;">Thanks For Playing!</h2>
-<h2 style = "text-align: center;">You Got ___ Points</h2>
+<h2 style = "text-align: center;">Playlist: {{ playlist_name }} </h2>
+<!-- calculate max points possible by multipilying num_songs by 100-->
+<h4 style = "text-align: center;">Max Points Possible: {{ max_possible_score }}  ({{num_songs}} songs)</h4>
+<h2 style = "text-align: center;">You Got {{ total_score }} Points</h2>
 
+
+
+<div style="display: flex; justify-content: space-between;">
+    <div>
+        <h3>Both Correct:</h3>
+        {% for item in both_correct %}
+            <p>{{ item.title }} - {{ item.artist }} : {{ item.time }} seconds</p>
+        {% endfor %}
+    </div>
+    <div>
+        <h3>Title Correct:</h3>
+        {% for item in title_correct %}
+            <p>{{ item.title }} - {{ item.artist }} : {{ item.time }} seconds</p>
+        {% endfor %}
+    </div>
+    <div>
+        <h3>Artist Correct:</h3>
+        {% for item in artist_correct %}
+            <p>{{ item.title }} - {{ item.artist }} : {{ item.time }} seconds</p>
+        {% endfor %}
+    </div>
+    <div>
+        <h3>Neither Correct:</h3>
+        {% for item in neither_correct %}
+            <p>{{ item.title }} - {{ item.artist }} : {{ item.time }} seconds</p>
+        {% endfor %}
+    </div>
+</div>
+
+
+
+
+<div style="display: flex; justify-content: space-around;">
+    <a href="/num_songs_select" class="btn">Replay Same Playlist</a>
+    <a href="/playlist_select" class="btn">Select a Different Playlist</a>
+    <a href="/logout" class="btn">Logout</a>
+</div>
 
 {% endblock %}
+
+
+

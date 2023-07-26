@@ -3,7 +3,8 @@
 {% extends 'base.html' %}
 
 {% block head %} 
-
+<title>Quizify</title>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
 <style>
    
     /* Center button styling */
@@ -114,6 +115,7 @@
 
 </style>
 
+
 {% endblock %}
 
 {% block body %} 
@@ -121,7 +123,9 @@
 
 <button class="hamburger">&#9776;</button>
 
-<nav class="hamburger-menu">
+<nav class="hamburger-menu"> 
+    <a href = "{{ url_for('num_songs_select') }}">Select Number of Songs</a>
+    <a href= "{{ url_for('playlist_select') }}">Select Playlist</a>
     <a href="{{ url_for('rules') }}">Rules</a>
     <a href="{{ url_for('logout') }}">Logout</a>
 </nav>
@@ -166,7 +170,13 @@
     let song_num;
     let total_songs = tracks.length;
     let currentSongName, currentArtists;
-  
+
+
+    let both_correct = [];
+    let title_correct = [];
+    let artist_correct = [];
+    let neither_correct = [];
+
 
 
 
@@ -192,6 +202,11 @@
                 start = Date.now();
                 timer = setInterval(updateElapsedTime, 1000);  // Update the elapsed time every second
                 isPlaying = true;  // Set the play state to true
+            }
+
+             // When song is ended
+            if(!state.paused && (state.position >= state.duration - 1000)) {
+                setTimeout(nextTrack, 1000);  // delay the nextTrack function by 1 second
             }
 
             if(state.paused && state.position === 0 && state.restrictions.disallow_resuming_reasons) {
@@ -251,7 +266,7 @@
 
 
         // Variables to track state
-        let start, pauseStart, playTime = 0, pauseCount = 0, totalScore = 0;
+        let start, pauseStart, playTime = 0, pauseCount = 0, total_score = 0;
         let isPlaying = false;
         // elapsed time timer
         let timer;
@@ -334,9 +349,20 @@
             modal.style.display = "none";
             song_num++;
 
-
+            // game is over
             if (song_num == total_songs + 1) {
-                window.location.href = 'result_page.html';
+                
+                $.ajax({
+                    type: 'POST',
+                    url: '/store_score',
+                    data: JSON.stringify({total_score: total_score, both_correct: both_correct, title_correct: title_correct, artist_correct: artist_correct, neither_correct: neither_correct}),
+                    contentType: 'application/json',
+                    success: function(response){
+                        console.log(response);
+                        // Here you can also add a redirection to the result page, after the score has been successfully sent
+                        window.location.href = "/result_page";
+                    }
+                });
             }
            
             clearInterval(pauseTimer);
@@ -420,7 +446,10 @@
             
         }
         processGuess = function() {
-            //console.log("process guess");
+            clearInterval(timer);  // Stop updating the elapsed time every second
+            clearInterval(pauseTimer);
+            document.getElementById('pausetimer').textContent = '';
+            console.log("process guess");
             let titleGuess = document.getElementById('title_guess').value;
             let artistGuess = document.getElementById('artist_guess').value;
             
@@ -442,7 +471,7 @@
         
         // Function to evaluate guesses and assign points
         function evaluateGuess(titleGuess, artistGuess, correctTitle, correctArtists) {
-            //console.log("evaluate guess");
+            console.log("evaluate guess");
             
             let elapsed = elapsedTime;
 
@@ -473,91 +502,156 @@
             let score;
             // guess before 2 seconds of playtime
             if (elapsed <= 2) {
-                score = calculateScore(titleCorrect, artistCorrect, 100, 50, elapsedTime);
+                score = calculateScore(titleCorrect, artistCorrect, 100, 50, elapsedTime, titleGuess, artistGuess);
             } 
             // guess before 4 seconds of playtime
             else if (elapsed <= 4) {
-                score = calculateScore(titleCorrect, artistCorrect, 90, 45, elapsedTime);
+                score = calculateScore(titleCorrect, artistCorrect, 90, 45, elapsedTime, titleGuess, artistGuess);
             } 
             // guess before 6 seconds of playtime
             else if (elapsed <= 6) {
-                score = calculateScore(titleCorrect, artistCorrect, 70, 35, elapsedTime);
+                score = calculateScore(titleCorrect, artistCorrect, 70, 35, elapsedTime, titleGuess, artistGuess);
             } 
             // guess before 10 seconds of playtime
             else if (elapsed <= 10) {
-                score = calculateScore(titleCorrect, artistCorrect, 40, 20, elapsedTime);
+                score = calculateScore(titleCorrect, artistCorrect, 40, 20, elapsedTime, titleGuess, artistGuess);
             } 
             // guess before 20 seconds of playtime
             else if (elapsed <= 20) {
-                score = calculateScore(titleCorrect, artistCorrect, 20, 10, elapsedTime);
+                score = calculateScore(titleCorrect, artistCorrect, 20, 10, elapsedTime, titleGuess, artistGuess);
             } 
             // guess before 30 seconds of playtime
             else if (elapsed <= 30) {
-                score = calculateScore(titleCorrect, artistCorrect, 10, 5, elapsedTime);
+                score = calculateScore(titleCorrect, artistCorrect, 10, 5, elapsedTime, titleGuess, artistGuess);
             } 
             else {
                 // need to mention you didnt get either correct.
-                score = calculateScore(titleCorrect, artistCorrect, 0, 0, elapsedTime);
+                score = calculateScore(titleCorrect, artistCorrect, 0, 0, elapsedTime, titleGuess, artistGuess);
             }
-            //console.log(score);
+            
             // Update total score
             
-
-            totalScore += score;
-            document.getElementById('score').textContent = "Total Score: " + totalScore;
+            console.log(score);
+            total_score += score;
+            document.getElementById('score').textContent = "Total Score: " + total_score;
             player.resume();
         }
 
-        function calculateScore(titleCorrect, artistCorrect, bothCorrectScore, oneCorrectScore, time) {
+        function calculateScore(titleCorrect, artistCorrect, bothCorrectScore, oneCorrectScore, time, titleguess, artistguess) {
+
+
             if (titleCorrect && artistCorrect && time <= 30) {
                 // Show the modal with the result
-                document.getElementById('modal-content').innerHTML = "Good Job! You correctly guess both the title and the artist of the song in " + time + " seconds!<br>"
-                                                                     + "The song was " + tracks[currentTrack].name + " by " + tracks[currentTrack].artist + "<br>" 
+                document.getElementById('modal-head').innerHTML = "Good Job!"
+                document.getElementById('modal-content').innerHTML = "You correctly guess both the title and the artist of the song in " + time + " seconds!<br><br>"
+                                                                     + "The song was " + tracks[currentTrack].name + " by " + tracks[currentTrack].artist + "<br><br>"
+                                                                     + "You guessed " + titleguess + " by " + artistguess + "<br><br>" 
                                                                      + "You get " + bothCorrectScore + " points.";
                 modal.style.display = "block";
-                //console.log("both correct");
+
+                let song = {
+                    'title': tracks[currentTrack].name,
+                    'artist': tracks[currentTrack].artist,
+                    'time': time
+                };
+                both_correct.push(song);
+
+                
                 return bothCorrectScore;
             }
             else if (titleCorrect && time <= 30) {
 
                 // Show the modal with the result
-                document.getElementById('modal-content').innerHTML = "Almost! You correctly guessed the title but not the artist of the song in " + time + " seconds.<br>"
-                                                                     + "The song was " + tracks[currentTrack].name + " by " + tracks[currentTrack].artist + "<br>" 
+                document.getElementById('modal-head').innerHTML = "Almost!"
+                document.getElementById('modal-content').innerHTML = "You correctly guessed the title but not the artist of the song in " + time + " seconds.<br><br>"
+                                                                     + "The song was " + tracks[currentTrack].name + " by " + tracks[currentTrack].artist + "<br><br>" 
+                                                                     + "You guessed " + titleguess + " by " + artistguess + "<br><br>"
                                                                      + "You get " + oneCorrectScore + " points.";
                 modal.style.display = "block";
-                //console.log("just title correct");
+                
+                
+
+                let song = {
+                    'title': tracks[currentTrack].name,
+                    'artist': tracks[currentTrack].artist,
+                    'time': time
+                };
+                title_correct.push(song);
+
+
+
                 return oneCorrectScore;
             }
             else if (artistCorrect && time <= 30) {
                 // Show the modal with the result
-                document.getElementById('modal-content').innerHTML = "Almost! You correctly guessed the artist but not the title of the song in " + time + " seconds.<br>"
-                                                                     + "The song was " + tracks[currentTrack].name + " by " + tracks[currentTrack].artist + "<br>" 
+                document.getElementById('modal-head').innerHTML = "Almost!"
+                document.getElementById('modal-content').innerHTML = "You correctly guessed the artist but not the title of the song in " + time + " seconds.<br><br>"
+                                                                     + "The song was " + tracks[currentTrack].name + " by " + tracks[currentTrack].artist + "<br><br>" 
+                                                                     + "You guessed " + titleguess + " by " + artistguess + "<br><br>"
                                                                      + "You get " + oneCorrectScore + " points.";
+
+
                 modal.style.display = "block";
-                //console.log("just arist correct");
+              
+
+                let song = {
+                    'title': tracks[currentTrack].name,
+                    'artist': tracks[currentTrack].artist,
+                    'time': time
+                };
+                artist_correct.push(song);
+
                 return oneCorrectScore;
             }
             else if (time <= 30) {
                 // Show the modal with the result
-                document.getElementById('modal-content').innerHTML = "Sorry! You did not correctly guess either the title or the artist of the song in " + time + " seconds.<br>"
-                                                                     + "The song was " + tracks[currentTrack].name + " by " + tracks[currentTrack].artist + "<br>" 
+                document.getElementById('modal-head').innerHTML = "Sorry!"
+                document.getElementById('modal-content').innerHTML = "You did not correctly guess either the title or the artist of the song in " + time + " seconds.<br><br>"
+                                                                     + "The song was " + tracks[currentTrack].name + " by " + tracks[currentTrack].artist + "<br><br>" 
+                                                                     + "You guessed " + titleguess + " by " + artistguess + "<br><br>"
                                                                      + "You get " + 0 + " points.";
                 modal.style.display = "block";
-                //console.log("neither correct");
+                
+
+
+                let song = {
+                    'title': tracks[currentTrack].name,
+                    'artist': tracks[currentTrack].artist,
+                    'time': time
+                };
+                neither_correct.push(song);
+
                 return 0;
             }
             else {
                 // Show the modal with the result
-                document.getElementById('modal-content').innerHTML = "Sorry! You can only get points if you enter a guess before 30 seconds of the song has played.<br>"
-                                                                     + "The song was " + tracks[currentTrack].name + " by " + tracks[currentTrack].artist + "<br>"  
+                document.getElementById('modal-head').innerHTML = "Sorry!"
+                document.getElementById('modal-content').innerHTML = "You can only get points if you enter a guess before 30 seconds of the song has played.<br><br>"
+                                                                     + "The song was " + tracks[currentTrack].name + " by " + tracks[currentTrack].artist + "<br><br>"  
+                                                                     + "You guessed " + titleguess + " by " + artistguess + "<br><br>"
                                                                      + "You get " + 0 + " points.";
                 modal.style.display = "block";
+
+                let song = {
+                    'title': tracks[currentTrack].name,
+                    'artist': tracks[currentTrack].artist,
+                    'time': time
+                };
+                neither_correct.push(song);
+
+                return 0;
             }
         }
 
 
+    
+
+
 
     };
+
+   
+    
 </script>
 
 <br>
@@ -573,11 +667,18 @@
 </form>
 
 
-
+<script>
+    document.addEventListener('keydown', function(event) {
+      var modal = document.getElementById('myModal');
+      if (event.keyCode == 13 && modal.style.display === "block") {
+        event.preventDefault();
+        nextTrack();  // Function to go to the next song and close the modal.
+      }
+    });
+  </script>
+  
 <br>
-<div class="button-container">
-    <button id="skip-button" class="skip-button" onclick="nextTrack()">Skip</button>
-</div>
+
 <br>
 <br>
 <br>
@@ -589,7 +690,7 @@
     <!-- Modal content -->
     <div class="modal-content">
       <span class="close">&times;</span>
-      <h2>Your Guess Results</h2>
+      <h2 id = "modal-head"></h2>
       <p id="modal-content"></p>
       <button id="next-song-button" onclick="nextTrack()">Next Song</button>
     </div>
@@ -597,6 +698,8 @@
   
 
 
+
+   
 
 <script>
     document.querySelector('.hamburger').addEventListener('click', function() {
