@@ -4,6 +4,23 @@
 {% block head %} 
 <title>Quizify</title>
 <style>
+    body {
+        color: #c5c6c7;
+    }
+    h1 {
+        color:#66fcf1;
+        text-align: center;
+        font-size: 5em;
+        margin-bottom: 0;
+        margin-top: 0;
+    }
+    h2 {
+        color: #45a29e;
+        font-size: 2em;
+        text-align: center;
+        margin-top: 0px;  /* adjust this value to reduce space above */
+        margin-bottom: 50px;  /* adjust this value to increase space below */
+    }
     .grid {
         display: grid;
         grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
@@ -21,6 +38,8 @@
         font-size: 30px;
         cursor: pointer;
         z-index: 2;
+        color: #66fcf1;
+        background-color: #0b0c10;
     }
 
     .hamburger-menu {
@@ -29,7 +48,7 @@
         right: 0;
         width: 0;
         height: 100vh;
-        background: #000000;
+        background: #1f2833;
         overflow-x: hidden;
         transition: 0.5s;
         padding-top: 60px;
@@ -45,8 +64,25 @@
     }
 
     .hamburger-menu a:hover {
-        color: #1DB954;
+        color: #66fcf1;
     }
+    .btn-primary {
+        display: inline-block;
+        background-color: #66fcf1;
+        color: #1f2833;
+        text-decoration: none;
+        font-size: .8em;
+        padding: 12px 24px;
+        border-radius: 20px;
+        border: none;
+        transition: all 0.3s ease 0s;
+    }
+
+    .btn-primary:hover {
+        background-color: #54d4dd;
+        color: #ffffff;
+    }
+
 </style>
 {% endblock %}
 
@@ -61,10 +97,10 @@
 </nav>
 
 
-<h1 style="text-align: center; font-size: 2.5em; margin-bottom: 0; margin-top: 0;">🎵Quizify🎵</h1>
+<h1>Quizify</h1>
 
 <br>
-<h3 style="text-align: center; margin-top: 0; margin-bottom: 5;">Select a playlist</h3>
+<h2>Select a playlist</h2>
 
 <div class="grid">
     {% for playlist in playlists %}
@@ -73,7 +109,7 @@
             {% if playlist['images'] %}
             <img src="{{ playlist['images'][0]['url'] }}" alt="{{ playlist['name'] }}" style="width: 100%;">
             {% endif %}
-            <a href="{{ playlist['external_urls']['spotify'] }}">Open in Spotify</a>
+            
             
             <form method="POST" action="{{ url_for('playlist_select') }}">
                 <input type="hidden" name="playlist_id" value="{{ playlist['id'] }}">

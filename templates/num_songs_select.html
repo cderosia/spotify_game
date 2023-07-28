@@ -5,6 +5,23 @@
 {% block head %} 
 <title>Quizify</title>
 <style>
+    body {
+        color: #c5c6c7;
+    }
+    h1 {
+        color:#66fcf1;
+        text-align: center;
+        font-size: 5em;
+        margin-bottom: 0;
+        margin-top: 0;
+    }
+    h2 {
+        color: #45a29e;
+        font-size: 1.25em;
+        text-align: center;
+        margin-top: 0px;  /* adjust this value to reduce space above */
+        margin-bottom: 50px;  /* adjust this value to increase space below */
+    }
     .container {
         display: flex;
         justify-content: center;
@@ -34,6 +51,8 @@
         font-size: 30px;
         cursor: pointer;
         z-index: 2;
+        color: #66fcf1;
+        background-color: #0b0c10;
     }
 
     .hamburger-menu {
@@ -42,7 +61,7 @@
         right: 0;
         width: 0;
         height: 100vh;
-        background: #000000;
+        background: #1f2833;
         overflow-x: hidden;
         transition: 0.5s;
         padding-top: 60px;
@@ -58,8 +77,44 @@
     }
 
     .hamburger-menu a:hover {
-        color: #1DB954;
+        color: #66fcf1;
     }
+    .btn-primary {
+        display: inline-block;
+        background-color: #66fcf1;
+        color: #1f2833;
+        text-decoration: none;
+        font-size: .6em;
+        padding: 12px 24px;
+        border-radius: 20px;
+        border: none;
+        transition: all 0.3s ease 0s;
+    }
+
+    .btn-primary:hover {
+        background-color: #54d4dd;
+        color: #ffffff;
+    }
+    input[type="number"] {
+        width: 10%;
+        padding: 10px 20px;
+        margin: 8px 0;
+        box-sizing: border-box;
+        border: 2px solid #66fcf1;
+        border-radius: 4px;
+        background-color: #f8f8f8;
+        font-size: 16px;
+        transition: all 0.3s ease 0s;
+    }
+
+    input[type="number"]:focus {
+        border-color: #66fcf1;
+        box-shadow: 0 0 5px #66fcf1;
+    }
+
+
+
+
 </style>
 {% endblock %}
 
@@ -73,19 +128,18 @@
     
 </nav>
 
-<h1 style="text-align: center; font-size: 2.5em; margin-bottom: 0;">🎵Quizify🎵</h1>
+<h1>Quizify</h1>
 <div class="container">
     <div class="form">
-        <h3 style="font-size: inherit;">Selected Playlist: {{ playlist_name }} ({{total_songs_in_playlist}} songs)</h3>
+        <h2>Selected Playlist: {{ playlist_name }} ({{total_songs_in_playlist}} songs)</h2>
         <br>
         <form method="POST">
             <label for="num_songs" style="font-size: inherit;">How many songs do you want to play with?</label>
             <input type="number" id="num_songs" name="num_songs" min="1" max="{{total_songs_in_playlist}}" required>
-            <input type="submit" value="Start Game">
+            <input type="submit" value="Start Game" class="btn-primary">
         </form>
         
-        <p style="font-size: 0.75em;">*May take a little longer for liked songs playlist</p>
-
+        <p style="font-size: 0.5em;">*May take a little longer for liked songs playlist</p>
     </div>
 </div>
 

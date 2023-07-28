@@ -6,20 +6,46 @@
 <title>Quizify</title>
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
 <style>
-   
-    /* Center button styling */
-    .center-button {
-        position: absolute;
-        top: 36%;
-        left: 50%;
-        transform: translate(-50%, -50%);
-        font-size: 1.5em;
+    body {
+        color: #c5c6c7;
     }
+   h1 {
+        color:#66fcf1;
+        text-align: center;
+        font-size: 5em;
+        margin-bottom: 0;
+        margin-top: 0;
+    }
+    h2 {
+        color: #45a29e;
+        
+        text-align: center;
+        
+    }
+    .btn-primary {
+        text-align: center;
+        display: inline-block;
+        background-color: #66fcf1;
+        color: #1f2833;
+        text-decoration: none;
+        font-size: 1em;
+        padding: 12px 24px;
+        border-radius: 20px;
+        border: none;
+        transition: all 0.3s ease 0s;
+    }
+
+    .btn-primary:hover {
+        background-color: #54d4dd;
+        color: #ffffff;
+    }
+    
     #pausetimer {
         
         text-align: center;
         top: 38%;
         font-size: 1.5em;
+        color: #45a29e;
     }
     .pausecount {
         top: 45%;
@@ -43,6 +69,8 @@
         font-size: 30px;
         cursor: pointer;
         z-index: 2;
+        color: #66fcf1;
+        background-color: #0b0c10;
     }
 
     .hamburger-menu {
@@ -51,7 +79,7 @@
         right: 0;
         width: 0;
         height: 100vh;
-        background: #000000;
+        background: #1f2833;
         overflow-x: hidden;
         transition: 0.5s;
         padding-top: 60px;
@@ -67,7 +95,7 @@
     }
 
     .hamburger-menu a:hover {
-        color: #1DB954;
+        color: #66fcf1;
     }
     
     /* The Modal (background) */
@@ -75,7 +103,7 @@
         display: none; /* Hidden by default */
         position: fixed; /* Stay in place */
         z-index: 1; /* Sit on top */
-        padding-top: 170px; /* Location of the box */
+        padding-top: 105px; /* Location of the box */
         left: 0;
         top: 0;
         width: 100%; /* Full width */
@@ -87,7 +115,8 @@
 
     /* Modal Content */
     .modal-content {
-        background-color: #1DB954;
+        color: #c5c6c7;
+        background-color: #0b0c10;
         margin: auto;
         padding: 20px;
         border: 1px solid black;
@@ -98,7 +127,7 @@
 
     /* The Close Button */
     .close {
-    color: #302f2f;
+    color: #1f2833;
     float: right;
     font-size: 28px;
     font-weight: bold;
@@ -111,6 +140,21 @@
     cursor: pointer;
     }
 
+    input[type="text"] {
+        width: 20%; /* You can adjust as needed */
+        padding: 12px 20px;
+        margin: 8px 0;
+        box-sizing: border-box;
+        border: 2px solid #66fcf1;
+        border-radius: 4px;
+        background-color: #f8f8f8;
+        color: #000;
+    }
+
+    input[type="text"]:focus {
+        outline: none;
+        border: 2px solid #66fcf1;
+    }
 
 
 </style>
@@ -131,7 +175,7 @@
 </nav>
 
 
-<h1 style="text-align: center; font-size: 2.5em; margin-bottom: 0;">🎵Quizify🎵</h1>
+<h1>Quizify</h1>
 <br>
 
 
@@ -141,16 +185,16 @@
 <div id="player">
     
     <div>
-        <h2 style = "text-align: center" id = "elapsed-time">Elapsed Time: 0 seconds</h2>
+        <h2 id = "elapsed-time">Elapsed Time: 0 seconds</h2>
     </div>
 </div>
 
-<button id="center-play-button" class="center-button" onclick="playPause()">Pause</button>
-<br>
-<br>
+<div class="button-container">
+    <button id="center-play-button" class="btn btn-primary" onclick="playPause()">Pause</button>
+</div>
 
 <br>
-<br>
+
 
 <div id="pausetimer"></div>
 <br>
@@ -663,7 +707,7 @@
     <input type="text" id="title_guess" name="title_guess"><br>
     <label for="artist_guess">Artist Guess:</label><br>
     <input type="text" id="artist_guess" name="artist_guess"><br><br>
-    <input type="submit" value="Submit">
+    <input class = "btn btn-primary" type="submit" value="Submit">
 </form>
 
 
@@ -692,7 +736,7 @@
       <span class="close">&times;</span>
       <h2 id = "modal-head"></h2>
       <p id="modal-content"></p>
-      <button id="next-song-button" onclick="nextTrack()">Next Song</button>
+      <button class = "btn btn-primary" id="next-song-button" onclick="nextTrack()">Next Song</button>
     </div>
   </div>
   

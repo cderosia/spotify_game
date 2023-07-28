@@ -2,24 +2,60 @@
 
 {% block head %} 
 <title>Quizify</title>
+
+<style>
+
+    body {
+        color: #c5c6c7;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-around;
+        align-items: center;
+        height: 80vh;
+        margin: 0;
+    }
+    
+    h1 {
+        color:#66fcf1;
+    }
+
+    .btn-primary {
+        display: inline-block;
+        background-color: #66fcf1;
+        color: #1f2833;
+        text-decoration: none;
+        font-size: 1em;
+        padding: 12px 24px;
+        border-radius: 20px;
+        border: none;
+        transition: all 0.3s ease 0s;
+    }
+
+    .btn-primary:hover {
+        background-color: #54d4dd;
+        color: #ffffff;
+    }
+
+    .content {
+        text-align: center;
+        height: 35vh;
+    }
+
+</style>
 {% endblock %}
 
 {% block body %} 
 
-<h1 style="text-align: center; font-size: 3em;">🎵Quizify🎵</h1>
+<h1 style="font-size: 5em;">Quizify</h1>
 
-<body style="text-align: center; font-size: 2em;">How well do you know the songs in your playlists?</body>
-<br>
-<br>
-<body style="text-align: center; font-size: 2em;">Log into your Spotify account below to find out!</body>
-<br>
-<body style="text-align: center; font-size: .5em;">Premium Account Required</body>
+<div class="content">
+    <p style="font-size: 2em;">How well do you know the songs in your playlists?</p>
 
-<div style="display: flex; justify-content: center; align-items: center; height: 50vh; font-size: 1em;">
-    <img src="{{ url_for('static', filename='icon3@2x.png') }}" alt="Image description" style="width: 50px; height: 50px; margin-right: 10px;">
+    <p style="font-size: 2em;">Log into your Spotify account below to find out!</p>
+</div>
+
+<div>
     <a href="{{ url_for('login') }}" class="btn btn-primary">LOGIN</a>
-
-    
 </div>
 
 {% endblock %}

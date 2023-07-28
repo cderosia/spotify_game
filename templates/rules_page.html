@@ -6,7 +6,35 @@
 <style>
     body {
         text-align: center;
+        color: #c5c6c7;
     }
+    h1 {
+        color:#66fcf1;
+        text-align: center;
+        font-size: 5em;
+    }
+    h2 {
+        color: #45a29e
+    }
+    .btn-primary {
+        display: inline-block;
+        background-color: #66fcf1;
+        color: #1f2833;
+        text-decoration: none;
+        font-size: 1em;
+        padding: 12px 24px;
+        border-radius: 20px;
+        border: none;
+        transition: all 0.3s ease 0s;
+    }
+
+
+
+    .btn-primary:hover {
+        background-color: #54d4dd;
+        color: #ffffff;
+    }
+
     .hamburger {
         position: absolute;
         top: 15px;
@@ -14,6 +42,8 @@
         font-size: 30px;
         cursor: pointer;
         z-index: 2;
+        color: #66fcf1;
+        background-color: #0b0c10;
     }
 
     .hamburger-menu {
@@ -22,7 +52,7 @@
         right: 0;
         width: 0;
         height: 100vh;
-        background: #000000;
+        background: #1f2833;
         overflow-x: hidden;
         transition: 0.5s;
         padding-top: 60px;
@@ -38,7 +68,7 @@
     }
 
     .hamburger-menu a:hover {
-        color: #1DB954;
+        color: #66fcf1;
     }
 </style>
 {% endblock %}
@@ -50,7 +80,7 @@
      <a style = "text-align: left;" href="{{ url_for('logout') }}">Logout</a>
 </nav>
 
-<h1 style="text-align: center; font-size: 2.5em; margin-bottom: 0; margin-top: 0;">🎵Quizify🎵</h1>
+<h1 style=" margin-bottom: 0; margin-top: 0;">Quizify</h1>
 
 <h2>Objective</h2>
 <body>The goal is to indentify both the title of the song and the artist(s) of the song.</body>
@@ -106,7 +136,7 @@
 <br>
 <br>
 
-<h3>Ready to Play?</h3>
+<h2>Ready to Play?</h2>
 
 <form action="{{ url_for('playlist_select') }}" method="get">
     <button type="submit" class="btn btn-primary">Select a Playlist</button>
