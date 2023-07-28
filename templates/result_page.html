@@ -36,25 +36,25 @@
 
 <div style="display: flex; justify-content: space-between;">
     <div>
-        <h3>Both Correct:</h3>
+        <h3>Both Correct: {{ both_correct|length }}</h3>
         {% for item in both_correct %}
             <p>{{ item.title }} - {{ item.artist }} : {{ item.time }} seconds</p>
         {% endfor %}
     </div>
     <div>
-        <h3>Title Correct:</h3>
+        <h3>Title Correct: {{ title_correct|length }}</h3>
         {% for item in title_correct %}
             <p>{{ item.title }} - {{ item.artist }} : {{ item.time }} seconds</p>
         {% endfor %}
     </div>
     <div>
-        <h3>Artist Correct:</h3>
+        <h3>Artist Correct: {{ artist_correct|length }}</h3>
         {% for item in artist_correct %}
             <p>{{ item.title }} - {{ item.artist }} : {{ item.time }} seconds</p>
         {% endfor %}
     </div>
     <div>
-        <h3>Neither Correct:</h3>
+        <h3>Neither Correct: {{ neither_correct|length }}</h3>
         {% for item in neither_correct %}
             <p>{{ item.title }} - {{ item.artist }} : {{ item.time }} seconds</p>
         {% endfor %}
