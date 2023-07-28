@@ -1,0 +1,61 @@
+{% extends 'base.html' %}
+
+{% block head %} 
+<title>Quizify</title>
+
+<style>
+
+    body {
+        color: #c5c6c7;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-around;
+        align-items: center;
+        height: 80vh;
+        margin: 0;
+    }
+    
+    h1 {
+        color:#66fcf1;
+    }
+
+    .btn-primary {
+        display: inline-block;
+        background-color: #66fcf1;
+        color: #1f2833;
+        text-decoration: none;
+        font-size: 1em;
+        padding: 12px 24px;
+        border-radius: 20px;
+        border: none;
+        transition: all 0.3s ease 0s;
+    }
+
+    .btn-primary:hover {
+        background-color: #54d4dd;
+        color: #ffffff;
+    }
+
+    .content {
+        text-align: center;
+        height: 35vh;
+    }
+
+</style>
+{% endblock %}
+
+{% block body %} 
+
+<h1 style="font-size: 5em;">Quizify</h1>
+
+<div class="content">
+    <p style="font-size: 2em;">How well do you know the songs in your playlists?</p>
+
+    <p style="font-size: 2em;">Log into your Spotify account below to find out!</p>
+</div>
+
+<div>
+    <a href="{{ url_for('login') }}" class="btn btn-primary">LOGIN</a>
+</div>
+
+{% endblock %}
