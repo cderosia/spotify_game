@@ -291,4 +291,4 @@ def result_page():
     )
 
 if __name__ == "__main__":
-    app.run(debug = True, port = 5001)
+    app.run(debug = False, host = '0.0.0.0')
