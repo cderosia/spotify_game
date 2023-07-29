@@ -15,7 +15,7 @@ app.config['SESSION_TYPE'] = 'filesystem'
 
 client_id = '1be96adf59fd4d9982d1b9143ced92d5'
 client_secret = '223b4d56d3f94b92b458b10dd2292532'
-redirect_uri = 'http://127.0.0.1:5008/callback'
+redirect_uri = 'https://quizify-game-796f6ba2dfa7.herokuapp.com/callback'
 scope = 'streaming user-read-private playlist-read-private user-top-read user-modify-playback-state user-read-email user-library-read'
 
 sp_oauth = SpotifyOAuth(client_id=client_id, client_secret=client_secret, redirect_uri=redirect_uri, 
