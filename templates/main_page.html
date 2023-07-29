@@ -389,8 +389,8 @@
 
         // Play next track
         nextTrack = function() {
-            //console.log(totalScore);
-
+            //console.log(totalScore)
+            document.getElementById('center-play-button').textContent = 'Pause';
             modal.style.display = "none";
             song_num++;
 
@@ -423,6 +423,7 @@
 
             if (currentTrack >= tracks.length - 1) {
                 console.log('End of playlist');
+                document.getElementById('next-song-button').innerHTML('See Results');
                 // open results_page.html
                 return;
             }
