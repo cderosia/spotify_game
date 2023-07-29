@@ -409,6 +409,11 @@
                     }
                 });
             }
+
+            if (song_num == total_songs - 1) {
+                document.getElementById('next-song-button').innerHTML = 'See Results';
+
+            }
            
             clearInterval(pauseTimer);
             pauseTimer = null;
@@ -423,7 +428,6 @@
 
             if (currentTrack >= tracks.length - 1) {
                 console.log('End of playlist');
-                document.getElementById('next-song-button').innerHTML('See Results');
                 // open results_page.html
                 return;
             }
@@ -476,6 +480,8 @@
 
         // Get the <span> element that closes the modal
         var span = document.getElementsByClassName("close")[0];
+
+        
 
         // When the user clicks on <span> (x), close the modal
         span.onclick = function() {
