@@ -587,7 +587,7 @@
             if (titleCorrect && artistCorrect && time <= 30) {
                 // Show the modal with the result
                 document.getElementById('modal-head').innerHTML = "Good Job!"
-                document.getElementById('modal-content').innerHTML = "You correctly guess both the title and the artist of the song in " + time + " seconds!<br><br>"
+                document.getElementById('modal-content').innerHTML = "You've correctly guessed both the title and the artist of the song in " + time + " seconds!<br><br>"
                                                                      + "The song was " + tracks[currentTrack].name + " by " + tracks[currentTrack].artist + "<br><br>"
                                                                      + "You guessed " + titleguess + " by " + artistguess + "<br><br>" 
                                                                      + "You get " + bothCorrectScore + " points.";
@@ -607,7 +607,7 @@
 
                 // Show the modal with the result
                 document.getElementById('modal-head').innerHTML = "Almost!"
-                document.getElementById('modal-content').innerHTML = "You correctly guessed the title but not the artist of the song in " + time + " seconds.<br><br>"
+                document.getElementById('modal-content').innerHTML = "You've correctly guessed the title but not the artist of the song in " + time + " seconds.<br><br>"
                                                                      + "The song was " + tracks[currentTrack].name + " by " + tracks[currentTrack].artist + "<br><br>" 
                                                                      + "You guessed " + titleguess + " by " + artistguess + "<br><br>"
                                                                      + "You get " + oneCorrectScore + " points.";
@@ -629,7 +629,7 @@
             else if (artistCorrect && time <= 30) {
                 // Show the modal with the result
                 document.getElementById('modal-head').innerHTML = "Almost!"
-                document.getElementById('modal-content').innerHTML = "You correctly guessed the artist but not the title of the song in " + time + " seconds.<br><br>"
+                document.getElementById('modal-content').innerHTML = "You've correctly guessed the artist but not the title of the song in " + time + " seconds.<br><br>"
                                                                      + "The song was " + tracks[currentTrack].name + " by " + tracks[currentTrack].artist + "<br><br>" 
                                                                      + "You guessed " + titleguess + " by " + artistguess + "<br><br>"
                                                                      + "You get " + oneCorrectScore + " points.";
@@ -734,7 +734,7 @@
     <!-- Modal content -->
     <div class="modal-content">
       <span class="close">&times;</span>
-      <h2 id = "modal-head"></h2>
+      <h2 style =  "color: #66fcf1" id = "modal-head"></h2>
       <p id="modal-content"></p>
       <button class = "btn btn-primary" id="next-song-button" onclick="nextTrack()">Next Song</button>
     </div>
