@@ -4,7 +4,8 @@ import spotipy
 from spotipy.oauth2 import SpotifyOAuth
 import random
 import os
-from dotenv import load_dotenv
+
+
 
 
 
@@ -15,18 +16,30 @@ app = Flask(__name__)
 app.secret_key = 'cpdBO$$24cxqfeCb1'
 app.config['SESSION_TYPE'] = 'filesystem'
 
-load_dotenv()
-client_id = os.getenv('SPOTIPY_CLIENT_ID')
-client_secret = os.getenv('CLIENT_SECRET')
 
+def load_env():
+    with open('.env', 'r') as file:
+        for line in file:
+            if line.strip() == '' or line.startswith('#'):
+                continue
+            key, value = line.strip().split('=', 1)
+            os.environ[key] = value
+
+load_env()
 
 
 
 redirect_uri = 'https://quizify-game-796f6ba2dfa7.herokuapp.com/callback'
 scope = 'streaming user-read-private playlist-read-private user-top-read user-modify-playback-state user-read-email user-library-read'
 
+
+client_id = os.environ.get('SPOTIPY_CLIENT_ID')
+client_secret = os.environ.get('CLIENT_SECRET')
+
 sp_oauth = SpotifyOAuth(client_id=client_id, client_secret=client_secret, redirect_uri=redirect_uri, 
                         scope=scope, show_dialog=True, cache_path= 'cache.txt')
+
+
 
 @app.route('/')
 def index():
