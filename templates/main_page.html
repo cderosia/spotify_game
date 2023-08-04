@@ -391,6 +391,8 @@
         nextTrack = function() {
             //console.log(totalScore)
             document.getElementById('center-play-button').textContent = 'Pause';
+            start = Date.now();
+            timer = setInterval(updateElapsedTime, 1000);  // Update the elapsed time every second
             modal.style.display = "none";
             song_num++;
 
