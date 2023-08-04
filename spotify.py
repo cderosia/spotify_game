@@ -16,7 +16,7 @@ app.secret_key = 'cpdBO$$24cxqfeCb1'
 app.config['SESSION_TYPE'] = 'filesystem'
 
 load_dotenv()
-client_id = os.getenv('CLIENT_ID')
+client_id = os.getenv('SPOTIPY_CLIENT_ID')
 client_secret = os.getenv('CLIENT_SECRET')
 
 
