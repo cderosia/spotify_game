@@ -1,12 +1,19 @@
 # Quizify
 
-My first ever web application. I built this completely independently, start to finish. 
+## Description
 
-You can try this game at www.quizify.net
+Quizify is a web app game that leverages the power of Spotify to challenge music enthusiasts. Users log in through their Spotify account, and all of their playlists are displayed, along with a playlist consisting of their liked/saved songs. They then select a number of songs from that playlist to play the game with.
 
+The game's main challenge is to see how quickly users can identify the title and artist of the song that is currently playing. Players earn more points the quicker they guess the title and/or artist, and fewer points for just getting one or the other. Test your musical knowledge and have fun with Quizify!
 
-A spotify premium acocunt is required for use at this current time.
-I plan to make it available for non spotify users by creating some default playlists (top current songs, top 80's songs, top rap songs) in the future. I also plan to make this avaibale for ios App Store.
+## Live Demo
 
+You can try Quizify live at [www.quizify.net](http://www.quizify.net/).
 
+## Technologies Used
 
+- Python (Flask)
+- JavaScript
+- HTML/CSS
+- Spotify API
+- Spotify Web Playback SDK
