@@ -4,6 +4,8 @@ import spotipy
 from spotipy.oauth2 import SpotifyOAuth
 import random
 import os
+from dotenv import load_dotenv
+
 
 
 
@@ -13,8 +15,13 @@ app = Flask(__name__)
 app.secret_key = 'cpdBO$$24cxqfeCb1'
 app.config['SESSION_TYPE'] = 'filesystem'
 
-client_id = '1be96adf59fd4d9982d1b9143ced92d5'
-client_secret = '223b4d56d3f94b92b458b10dd2292532'
+load_dotenv()
+client_id = os.getenv('CLIENT_ID')
+client_secret = os.getenv('CLIENT_SECRET')
+
+
+
+
 redirect_uri = 'https://quizify-game-796f6ba2dfa7.herokuapp.com/callback'
 scope = 'streaming user-read-private playlist-read-private user-top-read user-modify-playback-state user-read-email user-library-read'
 
@@ -30,6 +37,8 @@ def index():
 
     try:
         if os.path.exists(file_path):
+
+            #work around for small cache issue
             os.remove(file_path)
             print(f"File {file_path} has been successfully removed.")
         else:
