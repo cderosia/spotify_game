@@ -389,8 +389,10 @@
 
         // Play next track
         nextTrack = function() {
-            //console.log(totalScore);
-
+            //console.log(totalScore)
+            document.getElementById('center-play-button').textContent = 'Pause';
+            start = Date.now();
+            timer = setInterval(updateElapsedTime, 1000);  // Update the elapsed time every second
             modal.style.display = "none";
             song_num++;
 
@@ -408,6 +410,11 @@
                         window.location.href = "/result_page";
                     }
                 });
+            }
+
+            if (song_num == total_songs) {
+                document.getElementById('next-song-button').innerHTML = 'See Results';
+
             }
            
             clearInterval(pauseTimer);
@@ -475,6 +482,8 @@
 
         // Get the <span> element that closes the modal
         var span = document.getElementsByClassName("close")[0];
+
+        
 
         // When the user clicks on <span> (x), close the modal
         span.onclick = function() {
