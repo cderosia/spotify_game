@@ -20,7 +20,7 @@ app.config['SESSION_TYPE'] = 'filesystem'
 
 
 
-redirect_uri = 'https://quizify-game-796f6ba2dfa7.herokuapp.com/callback'
+redirect_uri = 'https://quizify-ovki.onrender.com/callback'
 scope = 'streaming user-read-private playlist-read-private user-top-read user-modify-playback-state user-read-email user-library-read'
 
 
