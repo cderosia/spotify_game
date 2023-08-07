@@ -1,5 +1,6 @@
-spotipy==2.23.0
-flask==2.3.2
+spotipy
+flask
 gunicorn
-
+os
+random
 
