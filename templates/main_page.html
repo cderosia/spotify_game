@@ -534,10 +534,10 @@
             // Remove everything inside parentheses or brackets
             // Remove everything after a hyphen
             // Remove all punctuation
-            let titleGuessClean = titleGuess.toLowerCase().replace(/[\(\[].*?[\)\]]/g, '').replace(/-.*/g, '').replace(/[.,\/#!$%\^&\*;:{}=\-_`~()]/g, '').trim();
-            let artistGuessClean = artistGuess.toLowerCase().replace(/[\(\[].*?[\)\]]/g, '').replace(/-.*/g, '').replace(/[.,\/#!$%\^&\*;:{}=\-_`~()]/g, '').trim();
-            let correctTitleClean = correctTitle.toLowerCase().replace(/[\(\[].*?[\)\]]/g, '').replace(/-.*/g, '').replace(/[.,\/#!$%\^&\*;:{}=\-_`~()]/g, '').trim();
-            let correctArtistsClean = correctArtists.toLowerCase().replace(/[\(\[].*?[\)\]]/g, '').replace(/-.*/g, '').replace(/[.,\/#!$%\^&\*;:{}=\-_`~()]/g, '').trim();
+            let titleGuessClean = titleGuess.toLowerCase().replace(/[\(\[].*?[\)\]]/g, '').replace(/-.*/g, '').replace(/[.,\/#!$%\^&\*;:{}=\-'`~()]/g, '').trim();
+            let artistGuessClean = artistGuess.toLowerCase().replace(/[\(\[].*?[\)\]]/g, '').replace(/-.*/g, '').replace(/[.,\/#!$%\^&\*;:{}=\-'`~()]/g, '').trim();
+            let correctTitleClean = correctTitle.toLowerCase().replace(/[\(\[].*?[\)\]]/g, '').replace(/-.*/g, '').replace(/[.,\/#!$%\^&\*;:{}=\-'`~()]/g, '').trim();
+            let correctArtistsClean = correctArtists.toLowerCase().replace(/[\(\[].*?[\)\]]/g, '').replace(/-.*/g, '').replace(/[.,\/#!$%\^&\*;:{}=\-'`~()]/g, '').trim();
 
             // Check guesses
             let titleCorrect = titleGuessClean === correctTitleClean;
