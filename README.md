@@ -8,7 +8,9 @@ The game's main challenge is to see how quickly users can identify the title and
 
 ## Live Demo
 
-You can try Quizify live at [www.quizify.net](http://www.quizify.net/).
+Quizify is currently not available for public use due to Spotify now having rules that state you cannot build any games using the Spotify API. I am currently looking for ways to work around this, maybe by using a different API. If you still want to give it a try, give me an email and I can authorize you as a beta tester. 
+
+Contact Me: cderosia3jr@gmail.com
 
 ## Technologies Used
 
